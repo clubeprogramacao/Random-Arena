@@ -1,0 +1,38 @@
+Initialize engine version: 5.2.3f1 (f3d16a1fa2dd)
+GfxDevice: creating device client; threaded=1
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.0]
+    Renderer: Intel(R) HD Graphics 530 (ID=0x191b)
+    Vendor:   Intel
+    VRAM:     128 MB
+Begin MonoManager ReloadAssembly
+Platform assembly: D:\Filipe\programacao\Unity Arena\Random Arena\_Builds\RandomArena_V_15.11.05_Data\Managed\UnityEngine.dll (this message is harmless)
+Loading D:\Filipe\programacao\Unity Arena\Random Arena\_Builds\RandomArena_V_15.11.05_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: D:\Filipe\programacao\Unity Arena\Random Arena\_Builds\RandomArena_V_15.11.05_Data\Managed\Assembly-CSharp.dll (this message is harmless)
+Loading D:\Filipe\programacao\Unity Arena\Random Arena\_Builds\RandomArena_V_15.11.05_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
+Platform assembly: D:\Filipe\programacao\Unity Arena\Random Arena\_Builds\RandomArena_V_15.11.05_Data\Managed\UnityEngine.UI.dll (this message is harmless)
+Loading D:\Filipe\programacao\Unity Arena\Random Arena\_Builds\RandomArena_V_15.11.05_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
+Platform assembly: D:\Filipe\programacao\Unity Arena\Random Arena\_Builds\RandomArena_V_15.11.05_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
+Loading D:\Filipe\programacao\Unity Arena\Random Arena\_Builds\RandomArena_V_15.11.05_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
+Platform assembly: D:\Filipe\programacao\Unity Arena\Random Arena\_Builds\RandomArena_V_15.11.05_Data\Managed\System.Core.dll (this message is harmless)
+- Completed reload, in  0.045 seconds
+desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
+<RI> Initializing input.
+<RI> Input initialized.
+<RI> Initialized touch support.
+Platform assembly: D:\Filipe\programacao\Unity Arena\Random Arena\_Builds\RandomArena_V_15.11.05_Data\Managed\System.dll (this message is harmless)
+Setting up 2 worker threads for Enlighten.
+  Thread -> id: 2b34 -> priority: 1 
+  Thread -> id: 1bc -> priority: 1 
+Unloading 2 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 2.313089 ms
+
+Unloading 1 unused Assets to reduce memory usage. Loaded Objects now: 337.
+Total: 0.338963 ms (FindLiveObjects: 0.028049 ms CreateObjectMapping: 0.023308 ms MarkObjects: 0.281679 ms  DeleteObjects: 0.005135 ms)
+
+Unloading 2 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.687013 ms
+
+Unloading 1 unused Assets to reduce memory usage. Loaded Objects now: 337.
+Total: 0.349234 ms (FindLiveObjects: 0.024098 ms CreateObjectMapping: 0.014222 ms MarkObjects: 0.291160 ms  DeleteObjects: 0.004740 ms)
+
