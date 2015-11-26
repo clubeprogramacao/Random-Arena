@@ -9,7 +9,7 @@ public class Player_script : MonoBehaviour {
 	// TODO: check wether to change some variables to private
 
 	// animations
-	public Animator anim;    // controls variables of the sprite animations (idle / walk)
+	private Animator anim;    // controls variables of the sprite animations (idle / walk)
 
 	// movement variables
 	private Rigidbody2D rb2d; // link to player physics. Recieves forces, has velocity
@@ -162,7 +162,7 @@ public class Player_script : MonoBehaviour {
 	}
 
 	void redFlames()  {changeHP (-1);}
-	void greenFlames() {changeHP (5);}
+	void greenFlames() {changeHP (10);}
 
 	void OnTriggerStay2D(Collider2D other)
 	{

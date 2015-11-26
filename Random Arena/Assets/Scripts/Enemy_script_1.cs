@@ -72,10 +72,30 @@ public class Enemy_script_1 : MonoBehaviour {
 
 	void updateAnim()
 	{
-		anim.SetFloat ("Speed_X", (float)Speed_X);
-		anim.SetFloat ("Speed_Y", (float)Speed_Y);
-		anim.SetBool ("Paralyzed", (bool)paralyzed);
-		anim.SetBool ("Damaged", (bool)takingDamage);
+		// speed_east
+		// speed_south
+		// speed_west
+		// speed_north
+		// hurt trigger
+		if (Speed_X >= 0) {
+			anim.SetFloat ("speed_east", (float)Speed_X);
+			anim.SetFloat ("speed_west", (float)0);
+		}
+		if (Speed_X < 0) {
+			anim.SetFloat ("speed_east", (float)0);
+			anim.SetFloat ("speed_west", (float)-Speed_X);
+		}
+		if (Speed_Y >= 0) {
+			anim.SetFloat ("speed_north", (float)Speed_Y);
+			anim.SetFloat ("speed_south", (float)0);
+		}
+		if (Speed_Y < 0) {
+			anim.SetFloat ("speed_north", (float)0);
+			anim.SetFloat ("speed_south", (float)-Speed_Y);
+		}
+		if (takingDamage)
+			anim.SetTrigger ("hurt");
+		takingDamage = false;
 	}
 	
 	void move()
@@ -121,7 +141,6 @@ public class Enemy_script_1 : MonoBehaviour {
 		if (change < 0) {
 			// add interaction when damaged
 			takingDamage = true;
-			anim.SetTrigger("damaged");
 		}
 		HP += change;
 		
@@ -140,7 +159,7 @@ public class Enemy_script_1 : MonoBehaviour {
 	}
 	
 	void redFlames()  {changeHP (-10);}
-	void greenFlames() {changeHP (5);}
+	void greenFlames() {changeHP (10);}
 	
 	void OnTriggerStay2D(Collider2D other)
 	{
@@ -154,8 +173,6 @@ public class Enemy_script_1 : MonoBehaviour {
 			changeHP(-10);
 			if(other.GetComponent<Walls_script>().wall == "North")
 			{
-				
-				anim.SetTrigger("damaged");
 				Speed_Y = -maxSpeed;
 				limitSpeed(maxSpeed);
 				rb2d.velocity = new Vector2(Speed_X,Speed_Y);
