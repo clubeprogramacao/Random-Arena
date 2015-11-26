@@ -10,8 +10,7 @@ public class Enemy_script_1 : MonoBehaviour {
 	
 	// animations
 	private Animator anim;    // controls variables of the sprite animations (idle / walk)
-	private int redFlashTime; // duration of damage indication (ms)
-	
+
 	// movement variables
 	private Rigidbody2D rb2d; // link to player physics. Recieves forces, has velocity
 	public int maxSpeed; // max velocity player can move (external forces included)
@@ -38,8 +37,7 @@ public class Enemy_script_1 : MonoBehaviour {
 	{
 		rb2d = GetComponent<Rigidbody2D>();
 		anim = GetComponent<Animator> ();
-		
-		redFlashTime = 20; // ms
+
 		maxSpeed = 500;
 		walkSpeed = 150;
 		startWalkSpeed = 50;
@@ -55,7 +53,7 @@ public class Enemy_script_1 : MonoBehaviour {
 	
 	void FixedUpdate () 
 	{
-
+		move ();
 	}
 	
 	void Update () 
@@ -66,11 +64,10 @@ public class Enemy_script_1 : MonoBehaviour {
 
 	void getMovement()
 	{
-		h = Random.value*2-1;
-		v = Random.value*2-1;
+		h = Mathf.RoundToInt((Random.value)*2-1);
+		v = Mathf.RoundToInt((Random.value)*2-1);
 		if (h == 0 && v == 0)
 			getMovement ();
-		move ();
 	}
 
 	void updateAnim()
