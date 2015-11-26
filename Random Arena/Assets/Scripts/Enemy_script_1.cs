@@ -129,7 +129,7 @@ public class Enemy_script_1 : MonoBehaviour {
 	}
 	
 	// calls updateAnim() + gameover()
-	void changeHP(int change)
+	public void changeHP(int change)
 	{
 		if (change > 0) {
 			// add interaction when healed
@@ -160,7 +160,8 @@ public class Enemy_script_1 : MonoBehaviour {
 	
 	void redFlames()  {changeHP (-10);}
 	void greenFlames() {changeHP (10);}
-	
+	public void knifeDamage(){changeHP (-30);}
+
 	void OnTriggerStay2D(Collider2D other)
 	{
 		// add code
@@ -187,6 +188,9 @@ public class Enemy_script_1 : MonoBehaviour {
 		
 		if(other.gameObject.tag == "Green_Flair")
 			InvokeRepeating("greenFlames",0.01f,0.25f);
+
+		if (other.gameObject.tag == "Player")
+			changeHP (10);
 		
 	}
 	
