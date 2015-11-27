@@ -58,7 +58,7 @@ public class Enemy_script_1 : MonoBehaviour {
 	
 	void Update () 
 	{
-		changeHP (0);
+		//changeHP (0);
 		updateAnim ();
 	}
 
@@ -136,6 +136,7 @@ public class Enemy_script_1 : MonoBehaviour {
 			takingDamage = false;
 		}
 		if (change == 0) {
+			// add interaction when neutral
 			takingDamage = false;
 		}
 		if (change < 0) {
@@ -207,6 +208,7 @@ public class Enemy_script_1 : MonoBehaviour {
 	void gameover()
 	{
 		Destroy (gameObject);
+
 	}
 	
 	

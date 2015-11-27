@@ -154,14 +154,14 @@ public class Player_script : MonoBehaviour {
 		if (HP <= 0) {
 			// when health fully depletes
 			HP = 0;
-			//gameover();
+			gameover();
 		}
 		// changes size of hp bar sprite
 		hp_bar.transform.localScale = new Vector2 ((float)(HP/100f),hp_bar.transform.localScale.y);
 		updateAnim ();
 	}
 
-	void redFlames()  {changeHP (-1);}
+	void redFlames()  {changeHP (-10);}
 	void greenFlames() {changeHP (10);}
 
 	void OnTriggerStay2D(Collider2D other)
@@ -191,8 +191,6 @@ public class Player_script : MonoBehaviour {
 		if(other.gameObject.tag == "Green_Flair")
 			InvokeRepeating("greenFlames",0.01f,0.25f);
 
-		if (other.gameObject.tag == "Enemy")
-			changeHP (-10);
 	}
 	
 	void OnTriggerExit2D(Collider2D other)
