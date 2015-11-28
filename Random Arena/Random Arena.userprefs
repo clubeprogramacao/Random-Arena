@@ -2,10 +2,11 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Player_script.cs">
     <Files>
-      <File FileName="Assets\Scripts\Player_script.cs" Line="42" Column="1" />
-      <File FileName="Assets\Scripts\Enemy_script_1.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\pause_menu.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Walls_script.cs" Line="1" Column="1" />
+      <File FileName="Random Arena.sln" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Player_script.cs" Line="164" Column="34" />
+      <File FileName="Assets\Scripts\PlayerwKnife_script.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Knife_script.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Enemy_script_1.cs" Line="208" Column="17" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

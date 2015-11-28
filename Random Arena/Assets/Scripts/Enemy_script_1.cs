@@ -10,8 +10,7 @@ public class Enemy_script_1 : MonoBehaviour {
 	
 	// animations
 	private Animator anim;    // controls variables of the sprite animations (idle / walk)
-	private int redFlashTime; // duration of damage indication (ms)
-	
+
 	// movement variables
 	private Rigidbody2D rb2d; // link to player physics. Recieves forces, has velocity
 	public int maxSpeed; // max velocity player can move (external forces included)
@@ -38,8 +37,7 @@ public class Enemy_script_1 : MonoBehaviour {
 	{
 		rb2d = GetComponent<Rigidbody2D>();
 		anim = GetComponent<Animator> ();
-		
-		redFlashTime = 20; // ms
+
 		maxSpeed = 500;
 		walkSpeed = 150;
 		startWalkSpeed = 50;
@@ -55,30 +53,49 @@ public class Enemy_script_1 : MonoBehaviour {
 	
 	void FixedUpdate () 
 	{
-
+		move ();
 	}
 	
 	void Update () 
 	{
-		changeHP (0);
+		//changeHP (0);
 		updateAnim ();
 	}
 
 	void getMovement()
 	{
-		h = Random.value*2-1;
-		v = Random.value*2-1;
+		h = Mathf.RoundToInt((Random.value)*2-1);
+		v = Mathf.RoundToInt((Random.value)*2-1);
 		if (h == 0 && v == 0)
 			getMovement ();
-		move ();
 	}
 
 	void updateAnim()
 	{
-		anim.SetFloat ("Speed_X", (float)Speed_X);
-		anim.SetFloat ("Speed_Y", (float)Speed_Y);
-		anim.SetBool ("Paralyzed", (bool)paralyzed);
-		anim.SetBool ("Damaged", (bool)takingDamage);
+		// speed_east
+		// speed_south
+		// speed_west
+		// speed_north
+		// hurt trigger
+		if (Speed_X >= 0) {
+			anim.SetFloat ("speed_east", (float)Speed_X);
+			anim.SetFloat ("speed_west", (float)0);
+		}
+		if (Speed_X < 0) {
+			anim.SetFloat ("speed_east", (float)0);
+			anim.SetFloat ("speed_west", (float)-Speed_X);
+		}
+		if (Speed_Y >= 0) {
+			anim.SetFloat ("speed_north", (float)Speed_Y);
+			anim.SetFloat ("speed_south", (float)0);
+		}
+		if (Speed_Y < 0) {
+			anim.SetFloat ("speed_north", (float)0);
+			anim.SetFloat ("speed_south", (float)-Speed_Y);
+		}
+		if (takingDamage)
+			anim.SetTrigger ("hurt");
+		takingDamage = false;
 	}
 	
 	void move()
@@ -112,19 +129,19 @@ public class Enemy_script_1 : MonoBehaviour {
 	}
 	
 	// calls updateAnim() + gameover()
-	void changeHP(int change)
+	public void changeHP(int change)
 	{
 		if (change > 0) {
 			// add interaction when healed
 			takingDamage = false;
 		}
 		if (change == 0) {
+			// add interaction when neutral
 			takingDamage = false;
 		}
 		if (change < 0) {
 			// add interaction when damaged
 			takingDamage = true;
-			anim.SetTrigger("damaged");
 		}
 		HP += change;
 		
@@ -143,8 +160,9 @@ public class Enemy_script_1 : MonoBehaviour {
 	}
 	
 	void redFlames()  {changeHP (-10);}
-	void greenFlames() {changeHP (5);}
-	
+	void greenFlames() {changeHP (10);}
+	public void knifeDamage(){changeHP (-30);}
+
 	void OnTriggerStay2D(Collider2D other)
 	{
 		// add code
@@ -157,8 +175,6 @@ public class Enemy_script_1 : MonoBehaviour {
 			changeHP(-10);
 			if(other.GetComponent<Walls_script>().wall == "North")
 			{
-				
-				anim.SetTrigger("damaged");
 				Speed_Y = -maxSpeed;
 				limitSpeed(maxSpeed);
 				rb2d.velocity = new Vector2(Speed_X,Speed_Y);
@@ -173,6 +189,9 @@ public class Enemy_script_1 : MonoBehaviour {
 		
 		if(other.gameObject.tag == "Green_Flair")
 			InvokeRepeating("greenFlames",0.01f,0.25f);
+
+		if (other.gameObject.tag == "Player")
+			changeHP (10);
 		
 	}
 	
@@ -189,6 +208,7 @@ public class Enemy_script_1 : MonoBehaviour {
 	void gameover()
 	{
 		Destroy (gameObject);
+
 	}
 	
 	
