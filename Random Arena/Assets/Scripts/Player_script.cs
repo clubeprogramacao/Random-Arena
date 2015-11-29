@@ -164,17 +164,12 @@ public class Player_script : MonoBehaviour {
 	void redFlames()  {changeHP (-10);}
 	void greenFlames() {changeHP (10);}
 
-	void OnTriggerStay2D(Collider2D other)
-	{
-		// add code
-	}
-
-	void OnTriggerEnter2D(Collider2D other)
+	void OnCollisionEnter2D (Collision2D other)
 	{
 		if(other.gameObject.tag == "Arena_Wall")
 		{
 			changeHP(-10);
-			if(other.GetComponent<Walls_script>().wall == "North")
+			if(other.gameObject.name == "North Wall")
 			{
 				Speed_Y = -maxSpeed;
 				limitSpeed(maxSpeed);
@@ -182,15 +177,18 @@ public class Player_script : MonoBehaviour {
 				paralyzed = true;
 			}
 		}
+		if (other.gameObject.tag == "Enemy") {
+			changeHP (-5);
+		}
+	}
 
-
+	void OnTriggerEnter2D(Collider2D other)
+	{
 		if (other.gameObject.tag == "Red_Flair")
 			InvokeRepeating("redFlames",0.01f,0.5f);
 
-
 		if(other.gameObject.tag == "Green_Flair")
 			InvokeRepeating("greenFlames",0.01f,0.25f);
-
 	}
 	
 	void OnTriggerExit2D(Collider2D other)
@@ -200,7 +198,6 @@ public class Player_script : MonoBehaviour {
 
 		if(other.gameObject.tag == "Green_Flair")
 			CancelInvoke(methodName:"greenFlames");
-
 	}
 
 	void gameover()

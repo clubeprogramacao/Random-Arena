@@ -167,7 +167,14 @@ public class Enemy_script_1 : MonoBehaviour {
 	{
 		// add code
 	}
-	
+
+	void OnCollisionEnter2D(Collision2D other) {
+		if (other.gameObject.tag == "Player") {
+			changeHP(+10);
+		}
+		
+	}
+
 	void OnTriggerEnter2D(Collider2D other)
 	{
 		if(other.gameObject.tag == "Arena_Wall")

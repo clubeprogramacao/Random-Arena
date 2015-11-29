@@ -3,11 +3,12 @@ using System.Collections;
 
 public class PlayerwKnife_script : MonoBehaviour {
 	
-	public Collider2D knife_north;
-	public Collider2D knife_east;
-	public Collider2D knife_west;
-	public Collider2D knife_south;
+	public GameObject knife_north;
+	public GameObject knife_east;
+	public GameObject knife_west;
+	public GameObject knife_south;
 	public GameObject player;
+	public GameObject knife;
 
 	private float attackCooldown;
 	private float attackTimer;
@@ -29,6 +30,7 @@ public class PlayerwKnife_script : MonoBehaviour {
 
 	void Update()
 	{
+		knife.SetActive (hasKnife);
 		getDirection ();
 		if(Input.GetKeyDown("space") && attackTimer == 0){
 			attacking = true;
@@ -67,22 +69,22 @@ public class PlayerwKnife_script : MonoBehaviour {
 	}
 
 	void updateKnife(int dir, bool permission){
-		knife_north.enabled = false;  //
-		knife_east.enabled = false;
-		knife_west.enabled = false;
-		knife_south.enabled = false;
+		knife_north.SetActive (false);  //
+		knife_east.SetActive (false);
+		knife_west.SetActive (false);
+		knife_south.SetActive (false);
 		switch (dir) {
 		case 2:
-			knife_south.enabled = permission;
+			knife_south.SetActive (permission);
 			return;
 		case 4:
-			knife_west.enabled = permission;
+			knife_west.SetActive (permission);
 			return;
 		case 6:
-			knife_east.enabled = permission;
+			knife_east.SetActive (permission);
 			return;
 		case 8:
-			knife_north.enabled = permission;
+			knife_north.SetActive (permission);
 			return;
 		}
 	}
