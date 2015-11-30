@@ -32,25 +32,35 @@ public class PlayerwKnife_script : MonoBehaviour {
 	{
 		knife.SetActive (hasKnife);
 		getDirection ();
-		if(Input.GetKeyDown("space") && attackTimer == 0){
+			if (Input.GetKeyDown ("space") && attackTimer == 0 && player.name == "Player") {
+				attacking = true;
+				updateKnife (facing, true);
+				attackTimer = attackCooldown;
+			}
+		if (Input.GetKeyDown (".") && attackTimer == 0 && player.name == "Player (2)") {
 			attacking = true;
-			updateKnife(facing,true);
+			updateKnife (facing, true);
 			attackTimer = attackCooldown;
 		}
-		if (attacking & attackTimer > 0) {
-			attackTimer -= Time.deltaTime;
-			if (attackTimer <= 0)
-				attackTimer = 0;
-		}
-		else{
-			attacking = false;
-			updateKnife(facing,false);
-		}
+			if (attacking & attackTimer > 0) {
+				attackTimer -= Time.deltaTime;
+				if (attackTimer <= 0)
+					attackTimer = 0;
+			} else {
+				attacking = false;
+				updateKnife (facing, false);
+			}
 	}
 
 	int getDirection(){
-		x = player.GetComponent<Player_script> ().Speed_X;
-		y = player.GetComponent<Player_script> ().Speed_Y;
+		if (player.name == "Player") {
+			x = player.GetComponent<Player_script> ().Speed_X;
+			y = player.GetComponent<Player_script> ().Speed_Y;
+		}
+		if (player.name == "Player (2)") {
+			x = player.GetComponent<Player2_script> ().Speed_X;
+			y = player.GetComponent<Player2_script> ().Speed_Y;
+		}
 
 
 		if (Mathf.Abs(x) > Mathf.Abs(y)){

@@ -55,8 +55,8 @@ public class Player_script : MonoBehaviour {
 
 	void FixedUpdate () 
 	{
-		h = Input.GetAxisRaw ("Horizontal");
-		v = Input.GetAxisRaw ("Vertical");
+		h = Input.GetAxisRaw ("p1h");
+		v = Input.GetAxisRaw ("p1v");
 		move ();
 	}
 
@@ -189,6 +189,7 @@ public class Player_script : MonoBehaviour {
 
 		if(other.gameObject.tag == "Green_Flair")
 			InvokeRepeating("greenFlames",0.01f,0.25f);
+
 	}
 	
 	void OnTriggerExit2D(Collider2D other)

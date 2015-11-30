@@ -15,5 +15,9 @@ public class Knife_script : MonoBehaviour {
 		if (other.gameObject.tag == "Enemy") {
 			other.SendMessage("changeHP",-damage);
 		}
+
+		if (other.gameObject.tag == "Player") {
+			other.SendMessage("changeHP",-damage);
+		}
 	}
 }

@@ -48,6 +48,7 @@
      <Compile Include="Assets\Scripts\Enemy_script_1.cs" />
      <Compile Include="Assets\Scripts\Game_Master_script.cs" />
      <Compile Include="Assets\Scripts\Knife_script.cs" />
+     <Compile Include="Assets\Scripts\Player2_script.cs" />
      <Compile Include="Assets\Scripts\Player_script.cs" />
      <Compile Include="Assets\Scripts\PlayerwKnife_script.cs" />
      <Compile Include="Assets\Scripts\Walls_script.cs" />
