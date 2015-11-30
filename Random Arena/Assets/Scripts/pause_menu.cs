@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections;
+using UnityEngine.UI;
 
 public class pause_menu : MonoBehaviour {
 
@@ -32,5 +33,8 @@ public class pause_menu : MonoBehaviour {
 
 	public void exit(){
 		Application.Quit ();
+	}
+	public void mainMenu(){
+		Application.LoadLevel ("Main Menu");
 	}
 }
