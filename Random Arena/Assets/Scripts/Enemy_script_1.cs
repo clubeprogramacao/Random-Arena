@@ -7,7 +7,9 @@ using System.Collections;
 public class Enemy_script_1 : MonoBehaviour {
 	
 	// TODO: check wether to change some variables to private
-	
+
+	public GameObject gameMaster;
+
 	// animations
 	private Animator anim;    // controls variables of the sprite animations (idle / walk)
 
@@ -28,10 +30,9 @@ public class Enemy_script_1 : MonoBehaviour {
 	public GameObject hp_bar; // green  hp bar over the player sprite
 	
 	// Texts
-	public Text text_X; // current horizontal speed displayed on canvas
-	public Text text_Y;	// current vertical speed displayed on canvas
 	public Text text_HP; /// current HP displayed on canvas
-	
+
+	public string LastHitter;
 	
 	void Start () 
 	{
@@ -62,14 +63,7 @@ public class Enemy_script_1 : MonoBehaviour {
 		updateAnim ();
 	}
 
-	void getMovement()
-	{
-		h = Mathf.RoundToInt((Random.value)*2-1);
-		v = Mathf.RoundToInt((Random.value)*2-1);
-		if (h == 0 && v == 0)
-			getMovement ();
-	}
-
+	// animations
 	void updateAnim()
 	{
 		// speed_east
@@ -97,7 +91,15 @@ public class Enemy_script_1 : MonoBehaviour {
 			anim.SetTrigger ("hurt");
 		takingDamage = false;
 	}
-	
+
+	// movement
+	void getMovement()
+	{
+		h = Mathf.RoundToInt((Random.value)*2-1);
+		v = Mathf.RoundToInt((Random.value)*2-1);
+		if (h == 0 && v == 0)
+			getMovement ();
+	}
 	void move()
 	{
 		Speed_X = (int)rb2d.velocity.x;
@@ -115,7 +117,6 @@ public class Enemy_script_1 : MonoBehaviour {
 			rb2d.velocity = new Vector2 (Speed_X , Speed_Y);
 		}
 	}
-	
 	void limitSpeed(int speedMax)
 	{
 		// normalize
@@ -158,15 +159,17 @@ public class Enemy_script_1 : MonoBehaviour {
 		hp_bar.transform.localScale = new Vector2 ((float)(HP/100f),hp_bar.transform.localScale.y);
 		updateAnim ();
 	}
-	
+
+	// damage / heal functions
 	void redFlames()  {changeHP (-10);}
 	void greenFlames() {changeHP (10);}
 	public void knifeDamage(){changeHP (-30);}
 
-	void OnTriggerStay2D(Collider2D other)
-	{
-		// add code
+
+	public void lastHit(string playerName){
+		LastHitter = playerName;
 	}
+	// collisions + triggers
 
 	void OnCollisionEnter2D(Collision2D other) {
 		if (other.gameObject.tag == "Player") {
@@ -214,6 +217,7 @@ public class Enemy_script_1 : MonoBehaviour {
 	
 	void gameover()
 	{
+		gameMaster.SendMessage ("zombieKilled", LastHitter);
 		Destroy (gameObject);
 
 	}

@@ -7,7 +7,7 @@ using System.Collections;
 public class Player2_script : MonoBehaviour {
 
 	// TODO: check wether to change some variables to private
-
+	public GameObject gameMaster;
 	// animations
 	private Animator anim;    // controls variables of the sprite animations (idle / walk)
 
@@ -29,10 +29,8 @@ public class Player2_script : MonoBehaviour {
 	public GameObject GameOverUI; // enables / disables the gameover screen when player dies (0 HP)
 
 	// Texts
-	public Text text_X; // current horizontal speed displayed on canvas
-	public Text text_Y;	// current vertical speed displayed on canvas
 	public Text text_HP; /// current HP displayed on canvas
-	
+	public string lastHitter;
 
 	void Start () 
 	{
@@ -96,8 +94,6 @@ public class Player2_script : MonoBehaviour {
 
 	void updateText()
 	{
-		text_X.text = "Speed_X: " + Speed_X.ToString ();
-		text_Y.text = "Speed_Y: " + Speed_Y.ToString ();
 		text_HP.text = "HP: " + HP.ToString();
 	}
 
@@ -164,6 +160,10 @@ public class Player2_script : MonoBehaviour {
 	void redFlames()  {changeHP (-10);}
 	void greenFlames() {changeHP (10);}
 
+	public void lastHit(string killer){
+		lastHitter = killer;
+	}
+
 	void OnCollisionEnter2D (Collision2D other)
 	{
 		if(other.gameObject.tag == "Arena_Wall")
@@ -202,8 +202,9 @@ public class Player2_script : MonoBehaviour {
 
 	void gameover()
 	{
-		GameOverUI.SetActive (true);
-		Time.timeScale = 0;
+		gameMaster.SendMessage ("playerKilled", lastHitter);
+		Destroy (gameObject);
+		//GameOverUI.SetActive (true);
 	}
 
 
