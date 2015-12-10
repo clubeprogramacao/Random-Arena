@@ -15,12 +15,12 @@ public class Knife_script : MonoBehaviour {
 	}
 	void OnTriggerEnter2D(Collider2D other){
 		enemy = other.gameObject.tag;
-		if (other.gameObject.tag == "Enemy") {
+		if (enemy == "Enemy") {
 			other.SendMessage("knifeDamage");
 			other.SendMessage("lastHit",playerName);
 		}
 
-		if (other.gameObject.tag == "Player") {
+		if (enemy == "Player") {
 			other.SendMessage("changeHP",-damage);
 			other.SendMessage("lastHit",playerName);
 		}

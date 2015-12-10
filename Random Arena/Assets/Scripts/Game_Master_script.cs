@@ -4,18 +4,18 @@ using UnityEngine.UI;
 
 public class Game_Master_script : MonoBehaviour {
 
-	public float p1Score;
-	public float p2Score;
-	public Text p1score;
-	public Text p2score;
+	public int noPlayers, noEnemies;
 
-	public GameObject player1;
-	public GameObject player2;
+	public float p1Score, p2Score;
+	public Text p1scoret, p2scoret;
+	public int p1score, p2score;
+
+	public GameObject player1 , player2;
 
 	public GameObject zombie1, zombie2, zombie3, zombie4, zombie5, zombie6;
 
 	public GameObject gameoverUI;
-	public int noPlayers, noEnemies;
+	
 
 	private int zombieKillScore;
 	private int playerKillScore;
@@ -34,10 +34,19 @@ public class Game_Master_script : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		p1score.text = "Score: " + p1Score;
-		p2score.text = "Score: " + p2Score;
-		if (noPlayers <= 1 ) {
-			gameoverUI.SetActive (true);
+//		p1scoret.text = "Score: " + p1Score;
+//S		p2scoret.text = "Score: " + p2Score;
+		if (noEnemies == 0) {
+			//gameoverUI.SetActive (true);
+			if ( p1score > p2score){
+				// p1 wins
+			}
+			if ( p1score < p2score){
+				// p2 wins
+			}
+			if ( p1score == p2score){
+				// tie
+			}
 		}
 	}
 

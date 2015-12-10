@@ -54,26 +54,10 @@ public class PlayerwKnife_script : MonoBehaviour {
 
 	int getDirection(){
 		if (player.name == "Player") {
-			x = player.GetComponent<Player_script> ().Speed_X;
-			y = player.GetComponent<Player_script> ().Speed_Y;
-		}
-		if (player.name == "Player (2)") {
-			x = player.GetComponent<Player2_script> ().Speed_X;
-			y = player.GetComponent<Player2_script> ().Speed_Y;
-		}
-
-
-		if (Mathf.Abs(x) > Mathf.Abs(y)){
-			if (x > 0)
-				facing = 6;
-			if(x < 0)
-				facing = 4;
-		}
-		if (Mathf.Abs(x) < Mathf.Abs (y)) {
-			if (y > 0)
-				facing = 8;
-			if (y < 0)
-				facing = 2;
+			facing = (player.GetComponent<Player_script> ().direction);
+		} else {
+			Debug.Log("ERROR: no player found on getDirection on PlayerwKnife_script");
+			return 2;
 		}
 		return facing;
 	}

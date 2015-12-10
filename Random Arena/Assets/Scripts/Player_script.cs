@@ -10,8 +10,8 @@ public class Player_script : MonoBehaviour {
 	public GameObject gameMaster;
 
 	// animations
-	private Animator anim;    // controls variables of the sprite animations (idle / walk)
-
+	//private Animator anim;    // controls variables of the sprite animations (idle / walk)
+	private Animator anim;
 	// movement variables
 	private Rigidbody2D rb2d; // link to player physics. Recieves forces, has velocity
 	public int maxSpeed; // max velocity player can move (external forces included)
@@ -21,27 +21,29 @@ public class Player_script : MonoBehaviour {
 	public float Speed_Y; // last frames' player vertical speed
 	public float h; // horizontal inputs < -1 | 0 | +1 >
 	public float v; // vertical inputs 	 < -1 | 0 | +1 >
+	public int direction; // direction player is facing (1,2,3,4,6,7,8 or 9)
 	public bool paralyzed; // makes player unable to walk when true
 
 	// hp related stuff
-	public int HP;    // player health points
+	public float HP;    // player health points
 	public bool takingDamage; // to create a red flash animation
 	public GameObject hp_bar; // green  hp bar over the player sprite
-	public GameObject GameOverUI; // enables / disables the gameover screen when player dies (0 HP)
+	public string lastHitter; // last player to hit this player
 
 	// Texts
 	public Text text_HP; /// current HP displayed on canvas
-	public string lastHitter;
+
+	public float pointerposx,pointerposy,playerposx,playerposy;
 
 	void Start () 
 	{
-		GameOverUI.SetActive (false);
 		rb2d = GetComponent<Rigidbody2D>();
 		anim = GetComponent<Animator> ();
 
 		maxSpeed = 500;
 		walkSpeed = 300;
 		startWalkSpeed = 50;
+		direction = 2;
 		paralyzed = false;
 		
 		HP = 100;
@@ -54,8 +56,15 @@ public class Player_script : MonoBehaviour {
 
 	void FixedUpdate () 
 	{
-		h = Input.GetAxisRaw ("p1h");
-		v = Input.GetAxisRaw ("p1v");
+		if (gameObject.name == "Player") {
+			h = Input.GetAxisRaw ("p1h");
+			v = Input.GetAxisRaw ("p1v");
+		}
+		if (gameObject.name == "Player (2)") {
+			h = Input.GetAxisRaw ("p2h");
+			v = Input.GetAxisRaw ("p2v");
+		}
+
 		move ();
 	}
 
@@ -67,35 +76,40 @@ public class Player_script : MonoBehaviour {
 	}
 	void updateAnim()
 	{
-		// speed_east
-		// speed_south
-		// speed_west
-		// speed_north
-		// hurt trigger
-		if (Speed_X >= 0) {
-			anim.SetFloat ("speed_east", (float)Speed_X);
-			anim.SetFloat ("speed_west", (float)0);
+		direction = 2;
+		Vector3 pointerPos = Camera.main.ScreenToWorldPoint (new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10));
+		pointerposx = pointerPos.x;
+		pointerposy = pointerPos.y;
+
+		Vector2 playerPos = new Vector2 (transform.position.x, transform.position.y);
+
+
+		playerposx = playerPos.x;
+		playerposy = playerPos.y;
+
+		if (Mathf.Abs (pointerposy - playerPos.y) <= Mathf.Abs (pointerposx - playerPos.x)) {
+			if (pointerposx > playerPos.x) {
+				direction = 6;
+			}
+			if (pointerposx < playerPos.x) {
+				direction = 4;
+			}
 		}
-		if (Speed_X < 0) {
-			anim.SetFloat ("speed_east", (float)0);
-			anim.SetFloat ("speed_west", (float)-Speed_X);
+		if (Mathf.Abs (pointerposy - playerPos.y) > Mathf.Abs (pointerposx - playerPos.x)) {
+			if (pointerposy > playerPos.y) {
+				direction = 8;
+			}
+			if (pointerposy < playerPos.y) {
+				direction = 2;
+			}
 		}
-		if (Speed_Y >= 0) {
-			anim.SetFloat ("speed_north", (float)Speed_Y);
-			anim.SetFloat ("speed_south", (float)0);
-		}
-		if (Speed_Y < 0) {
-			anim.SetFloat ("speed_north", (float)0);
-			anim.SetFloat ("speed_south", (float)-Speed_Y);
-		}
-		if (takingDamage)
-			anim.SetTrigger ("hurt");
-		takingDamage = false;
+		anim.SetInteger ("Direction", direction);
+		anim.SetBool("Moving",!(Mathf.Abs(rb2d.velocity.x) <= 80 && Mathf.Abs(rb2d.velocity.y) <= 80));
 	}
 
 	void updateText()
 	{
-		text_HP.text = "HP: " + HP.ToString();
+		text_HP.text = "HP: " + ((int)HP).ToString();
 	}
 
 	void move()
@@ -129,7 +143,7 @@ public class Player_script : MonoBehaviour {
 	}
 
 	// calls updateAnim() + gameover()
-	void changeHP(int change)
+	void changeHP(float change)
 	{
 		if (change > 0) {
 			// add interaction when healed
@@ -158,8 +172,6 @@ public class Player_script : MonoBehaviour {
 		updateAnim ();
 	}
 
-	void redFlames()  {changeHP (-10);}
-	void greenFlames() {changeHP (10);}
 
 	public void lastHit(string killer){
 		lastHitter = killer;
@@ -183,30 +195,22 @@ public class Player_script : MonoBehaviour {
 		}
 	}
 
-	void OnTriggerEnter2D(Collider2D other)
+
+	void OnTriggerStay2D(Collider2D other)
 	{
 		if (other.gameObject.tag == "Red_Flair")
-			InvokeRepeating("redFlames",0.01f,0.5f);
-
-		if(other.gameObject.tag == "Green_Flair")
-			InvokeRepeating("greenFlames",0.01f,0.25f);
+			changeHP (-1f);
+		if (other.gameObject.tag == "Green_Flair")
+			changeHP (1f);
 
 	}
-	
-	void OnTriggerExit2D(Collider2D other)
-	{
-		if(other.gameObject.tag == "Red_Flair")
-			CancelInvoke(methodName:"redFlames");
 
-		if(other.gameObject.tag == "Green_Flair")
-			CancelInvoke(methodName:"greenFlames");
-	}
+
 
 	void gameover()
 	{
 		gameMaster.SendMessage ("playerKilled", lastHitter);
 		Destroy (gameObject);
-		//GameOverUI.SetActive (true);
 	}
 
 

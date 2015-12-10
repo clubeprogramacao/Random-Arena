@@ -26,7 +26,6 @@ public class Player2_script : MonoBehaviour {
 	public int HP;    // player health points
 	public bool takingDamage; // to create a red flash animation
 	public GameObject hp_bar; // green  hp bar over the player sprite
-	public GameObject GameOverUI; // enables / disables the gameover screen when player dies (0 HP)
 
 	// Texts
 	public Text text_HP; /// current HP displayed on canvas
@@ -34,7 +33,6 @@ public class Player2_script : MonoBehaviour {
 
 	void Start () 
 	{
-		GameOverUI.SetActive (false);
 		rb2d = GetComponent<Rigidbody2D>();
 		anim = GetComponent<Animator> ();
 
@@ -204,7 +202,6 @@ public class Player2_script : MonoBehaviour {
 	{
 		gameMaster.SendMessage ("playerKilled", lastHitter);
 		Destroy (gameObject);
-		//GameOverUI.SetActive (true);
 	}
 
 
