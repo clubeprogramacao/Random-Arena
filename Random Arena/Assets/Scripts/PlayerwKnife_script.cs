@@ -17,31 +17,28 @@ public class PlayerwKnife_script : MonoBehaviour {
 	public int facing; // up 8 | down 2 | left 4 | right 6 //
 	public float x;
 	public float y;
+	private string fireString;
 
 	void Awake()
 	{
-		hasKnife = true;
+		hasKnife = false;
 		attacking = false;
 		facing = 2;
 		updateKnife(facing,false);
 		attackTimer = 0f;
 		attackCooldown = 0.3f;
+		fireString = "mouse 0";
 	}
 
 	void Update()
 	{
 		knife.SetActive (hasKnife);
 		getDirection ();
-			if (Input.GetKeyDown ("space") && attackTimer == 0 && player.name == "Player") {
+		if (Input.GetKeyDown (fireString) && attackTimer == 0 && player.name == "Player") {
 				attacking = true;
 				updateKnife (facing, true);
 				attackTimer = attackCooldown;
 			}
-		if (Input.GetKeyDown (".") && attackTimer == 0 && player.name == "Player (2)") {
-			attacking = true;
-			updateKnife (facing, true);
-			attackTimer = attackCooldown;
-		}
 			if (attacking & attackTimer > 0) {
 				attackTimer -= Time.deltaTime;
 				if (attackTimer <= 0)

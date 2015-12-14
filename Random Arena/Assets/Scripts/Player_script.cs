@@ -12,6 +12,7 @@ public class Player_script : MonoBehaviour {
 	// animations
 	//private Animator anim;    // controls variables of the sprite animations (idle / walk)
 	private Animator anim;
+
 	// movement variables
 	private Rigidbody2D rb2d; // link to player physics. Recieves forces, has velocity
 	public int maxSpeed; // max velocity player can move (external forces included)
@@ -30,6 +31,8 @@ public class Player_script : MonoBehaviour {
 	public GameObject hp_bar; // green  hp bar over the player sprite
 	public string lastHitter; // last player to hit this player
 
+	//weapon 
+	public string weapon;
 	// Texts
 	public Text text_HP; /// current HP displayed on canvas
 
@@ -48,6 +51,8 @@ public class Player_script : MonoBehaviour {
 		
 		HP = 100;
 		takingDamage = false;
+
+		weapon = "gun";
 
 		updateText ();
 	}

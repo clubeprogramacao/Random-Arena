@@ -34,7 +34,7 @@ public class Game_Master_script : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-//		p1scoret.text = "Score: " + p1Score;
+		p1scoret.text = "Score: " + ((int)p1Score).ToString();
 //S		p2scoret.text = "Score: " + p2Score;
 		if (noEnemies == 0) {
 			//gameoverUI.SetActive (true);
