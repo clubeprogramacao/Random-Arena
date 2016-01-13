@@ -26,30 +26,32 @@ public class gun_script : MonoBehaviour {
 			hasGun = false;
 
 		if (hasGun) {
-			if (Input.GetKeyDown ("mouse 0")) {
-				GameObject clone = Instantiate(bullet,player.transform.position,Quaternion.identity) as GameObject;
-				clone.SetActive(true);
-				rb2db =  clone.GetComponent<Rigidbody2D>();//player.GetComponent<Transform>().position, Quaternion.identity
+			if (Input.GetKey("mouse 0")) { //if (Input.GetKeyDown ("mouse 0")) {
 				switch (player.GetComponent<Player_script> ().direction){
 				case 2:
-					rb2db.position = new Vector2 (player.GetComponent<Transform>().position.x,player.GetComponent<Transform>().position.y-20.7f);
-					rb2db.velocity = new Vector2(player.GetComponent<Player_script>().Speed_X,-speed);
+					clone = Instantiate(bullet,new Vector3(player.GetComponent<Transform>().position.x,player.GetComponent<Transform>().position.y-22f,0f) ,Quaternion.identity) as GameObject;
+					clone.SetActive(true);
+					clone.GetComponent<Rigidbody2D>().velocity = new Vector2(player.GetComponent<Player_script>().Speed_X,-speed);
 					break;
 				case 4:
-					rb2db.position = new Vector2 (player.GetComponent<Transform>().position.x-16.9f,player.GetComponent<Transform>().position.y-9.2f);
-					rb2db.velocity = new Vector2(-speed,player.GetComponent<Player_script>().Speed_Y);
+					clone = Instantiate(bullet,new Vector3(player.GetComponent<Transform>().position.x-20f,player.GetComponent<Transform>().position.y-9.2f,0f) ,Quaternion.identity) as GameObject;
+					clone.SetActive(true);
+					clone.GetComponent<Rigidbody2D>().velocity = new Vector2(-speed,player.GetComponent<Player_script>().Speed_Y);
 					break;
 				case 6:
-					rb2db.position = new Vector2 (player.GetComponent<Transform>().position.x+16.9f,player.GetComponent<Transform>().position.y-9.2f);
-					rb2db.velocity = new Vector2(speed,player.GetComponent<Player_script>().Speed_Y);
+					clone = Instantiate(bullet,new Vector3(player.GetComponent<Transform>().position.x+20f,player.GetComponent<Transform>().position.y-9.2f,0f) ,Quaternion.identity) as GameObject;
+					clone.SetActive(true);
+					clone.GetComponent<Rigidbody2D>().velocity = new Vector2(speed,player.GetComponent<Player_script>().Speed_Y);
 					break;
 				case 8:
-					rb2db.position = new Vector2 (player.GetComponent<Transform>().position.x,player.GetComponent<Transform>().position.y+1.9f);
-					rb2db.velocity = new Vector2(player.GetComponent<Player_script>().Speed_X,speed);
+					clone = Instantiate(bullet,new Vector3(player.GetComponent<Transform>().position.x,player.GetComponent<Transform>().position.y+2f,0f) ,Quaternion.identity) as GameObject;
+					clone.SetActive(true);
+					clone.GetComponent<Rigidbody2D>().velocity = new Vector2(player.GetComponent<Player_script>().Speed_X,speed);
 					break;
 				default:
 					break;
 				}
+				clone.GetComponent<bullet_script>().shooter = player.name;
 			}
 
 		}
