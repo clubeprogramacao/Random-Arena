@@ -10,6 +10,7 @@ public class playerMovement_script : NetworkBehaviour
 	
 
 	// movement variables
+	[SyncVar]
 	public Rigidbody2D rb2d; // link to player physics. Recieves forces, has velocity
 	/*
 	// hp related stuff
@@ -92,21 +93,21 @@ public class playerMovement_script : NetworkBehaviour
 	[Command]
 	void Cmd_move()
 	{
-		if(!isLocalPlayer)
-			Debug.Log (rb2d.name + "H: " + h);
 		rb2d.AddForce(new Vector2(h * playerSpeed, v * playerSpeed),ForceMode2D.Impulse);
 		Speed_X = rb2d.velocity.x;
 		Speed_Y = rb2d.velocity.y;
-		Rpc_move ();
+		Rpc_move (rb2d.position);
 	}
 
 	[ClientRpc]
-    void Rpc_move()
+	void Rpc_move(Vector2 newRb2dPos)
     {
-		rb2d.AddForce(new Vector2(h * playerSpeed, v * playerSpeed),ForceMode2D.Impulse);
-        Speed_X = rb2d.velocity.x;
-        Speed_Y = rb2d.velocity.y;
-
+		if (isServer)
+			return;
+		rb2d.position = newRb2dPos;
+		//rb2d.AddForce(new Vector2(h * playerSpeed, v * playerSpeed),ForceMode2D.Impulse);
+		Speed_X = rb2d.velocity.x;
+		Speed_Y = rb2d.velocity.y;
 		
 	}
 
