@@ -69,6 +69,7 @@ public class playerMovement_script : NetworkBehaviour
             return;
 
 		Cmd_getMovementInput ();
+		predictMovement ();
 		Cmd_move ();
         limitSpeed(maxSpeed);
 	}
@@ -84,6 +85,11 @@ public class playerMovement_script : NetworkBehaviour
 		Cmd_setInputs (h, v);
 	}
 
+	void predictMovement(){
+		if(!isServer)
+		rb2d.AddForce(new Vector2(h * playerSpeed, v * playerSpeed),ForceMode2D.Impulse);
+	}
+
 	[Command]
 	void Cmd_setInputs(float newH, float newV){
 		h = newH;
@@ -96,16 +102,19 @@ public class playerMovement_script : NetworkBehaviour
 		rb2d.AddForce(new Vector2(h * playerSpeed, v * playerSpeed),ForceMode2D.Impulse);
 		Speed_X = rb2d.velocity.x;
 		Speed_Y = rb2d.velocity.y;
-		Rpc_move (rb2d.position);
+		Rpc_move (rb2d.position, rb2d.velocity);
 	}
 
 	[ClientRpc]
-	void Rpc_move(Vector2 newRb2dPos)
+	void Rpc_move(Vector2 newRb2dPos, Vector2 newvelocity)
     {
 		if (isServer)
 			return;
-		rb2d.position = newRb2dPos;
+		//rb2d.position = Vector2.Lerp (rb2d.position, newRb2dPos, 0.01f);
 		//rb2d.AddForce(new Vector2(h * playerSpeed, v * playerSpeed),ForceMode2D.Impulse);
+
+		rb2d.position = newRb2dPos;
+		rb2d.velocity = newvelocity;
 		Speed_X = rb2d.velocity.x;
 		Speed_Y = rb2d.velocity.y;
 		
