@@ -5,7 +5,11 @@ using UnityEngine.UI;
 
 public class combat_script : NetworkBehaviour {
 
+
+
 	//    ====================    Sync Variables (updated on Server)    ====================    //
+
+
 
 	[SyncVar (hook = "changeHealth")] public float health; // current health
 	void changeHealth(float newHealth){
@@ -33,12 +37,17 @@ public class combat_script : NetworkBehaviour {
 	}
 
 
+
 	//    ====================    UI objects for display on the client    ====================    //
+
+
+
 	public Text healthText;
 
 
 
 	//    ====================    Client Functions    ====================    //
+
 
 
 	// Use this for initialization
@@ -49,11 +58,6 @@ public class combat_script : NetworkBehaviour {
 		health = maxHealth;
 		attack = 2;
 		invincTimer = 0;
-
-	}
-
-	void FixedUpdate(){
-
 
 	}
 
@@ -69,6 +73,7 @@ public class combat_script : NetworkBehaviour {
 		healthText.text = "HP: " + health;
 	}
 
+	// runs whenever a tear hits this gameobject
 	public void OnTearHit(GameObject tearHit){
 		if (!isServer)
 			return;
@@ -81,7 +86,10 @@ public class combat_script : NetworkBehaviour {
 	}
 
 
+
 	//    ====================    Server Functions    ====================    //
+
+
 
 	// changes player health (to values between 0 and maxHealth)
 	[Command]
@@ -99,14 +107,6 @@ public class combat_script : NetworkBehaviour {
 		}
 	}
 
-	[ClientRpc]
-	void Rpc_respawn(){
-		if (isLocalPlayer) {
-			transform.position = Vector3.zero;
-			GetComponent<Rigidbody2D> ().velocity = Vector2.zero;
-		}
-	}
-
 	// applies an impulse force to the object
 	[Command]
 	void Cmd_knockBack(float intensity, Vector2 direction){
@@ -114,6 +114,18 @@ public class combat_script : NetworkBehaviour {
 		Rpc_knockBack (intensity,direction);
 	}
 
+
+	//    ====================    Client Only Commands    ====================    //
+
+
+
+	[ClientRpc]
+	void Rpc_respawn(){
+		if (isLocalPlayer) {
+			transform.position = Vector3.zero;
+			GetComponent<Rigidbody2D> ().velocity = Vector2.zero;
+		}
+	}
 
 	[ClientRpc]
 	void Rpc_knockBack(float intensity, Vector2 direction){
