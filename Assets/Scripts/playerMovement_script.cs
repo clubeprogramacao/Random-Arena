@@ -105,6 +105,7 @@ public class playerMovement_script : NetworkBehaviour
 		if (isServer)
 			return;
 		//rb2d.position = Vector2.Lerp (rb2d.position, newRb2dPos, 0.01f);
+		//rb2d.velocity = Vector2.Lerp (rb2d.velocity, newvelocity, 0.01f);
 		//rb2d.AddForce(new Vector2(h * playerSpeed, v * playerSpeed),ForceMode2D.Impulse);
 
 		rb2d.position = newRb2dPos;
