@@ -88,7 +88,7 @@ public class MainMenuButtons_script : NetworkBehaviour {
 
 	public void OnFinishCreateMatch(){
 		roomNameCreate = GameObject.Find ("Create Room Name Text").GetComponent<Text> ().text;
-		roomPasswordCreate = GameObject.Find ("Create Room Password Text").GetComponent<Text> ().text;
+		roomPasswordCreate = GameObject.Find ("Create Room Password").GetComponent<InputField> ().text;
 		objectNetwork.SendMessage ("OnFinishCreateMatch", gameObject);
 	}
 
@@ -155,7 +155,7 @@ public class MainMenuButtons_script : NetworkBehaviour {
 
 	public void OnJoinMatchOk(GameObject pass){
 		roomNameJoin = GameObject.Find ("Canvas").GetComponent<MainMenuButtons_script> ().roomNameJoin;
-		roomPasswordJoin = pass.GetComponent<Text>().text;
+		roomPasswordJoin = pass.GetComponent<InputField>().text; Debug.Log ("Pass: " + roomPasswordJoin);
 		objectNetwork.SendMessage ("OnJoinMatch",gameObject);
 	}
 
