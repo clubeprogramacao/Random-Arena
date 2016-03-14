@@ -35,7 +35,7 @@ public class combat_script : NetworkBehaviour {
 	void changeLasthitter(string newLasthitter){
 		lasthitter = newLasthitter;
 	}
-
+	[SyncVar] public int bombs;
 
 
 	//    ====================    UI objects for display on the client    ====================    //
@@ -58,6 +58,7 @@ public class combat_script : NetworkBehaviour {
 		health = maxHealth;
 		attack = 2;
 		invincTimer = 0;
+		bombs = 0;
 
 	}
 
@@ -85,7 +86,19 @@ public class combat_script : NetworkBehaviour {
 		changeLasthitter (tearShooter);
 	}
 
+	public void OnHeartHit(GameObject heart){
+		if (!isServer)
+			return;
+		int heal = heart.GetComponent<Heart_script> ().health;
+		Cmd_changeHealth (heal);
+	}
 
+
+	public void OnBombHit(){
+		if (!isServer)
+			return;
+		Cmd_changeBombs ();
+	}
 
 	//    ====================    Server Functions    ====================    //
 
@@ -112,6 +125,11 @@ public class combat_script : NetworkBehaviour {
 	void Cmd_knockBack(float intensity, Vector2 direction){
 		gameObject.GetComponent<Rigidbody2D> ().AddForce (direction*intensity,ForceMode2D.Impulse);
 		Rpc_knockBack (intensity,direction);
+	}
+
+	[Command]
+	void Cmd_changeBombs(){
+		bombs++;
 	}
 
 

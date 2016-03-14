@@ -35,6 +35,7 @@ public class playerMovement_script : NetworkBehaviour
 	{
         gameObject.name = "[Player]" + GetInstanceID().ToString();
 		rb2d = GetComponent<Rigidbody2D>();
+		playerSpeed = 33;
 	}
 	
 	// Update is called once per frame
@@ -52,7 +53,7 @@ public class playerMovement_script : NetworkBehaviour
             return;
 
 		getMovementInput ();
-		predictMovement ();
+		//predictMovement ();
 		Cmd_move ();
 	}
 
