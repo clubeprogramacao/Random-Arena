@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.Networking;
 
-public class FakeHeart_script : NetworkBehaviour {
+public class bombPick_script : NetworkBehaviour {
 
 
 
