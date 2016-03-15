@@ -6,9 +6,9 @@ using UnityEngine.UI;
 public class combat_script : NetworkBehaviour {
 
 
+	public GameObject bomb;
 
 	//    ====================    Sync Variables (updated on Server)    ====================    //
-
 
 
 	[SyncVar] 
@@ -27,8 +27,10 @@ public class combat_script : NetworkBehaviour {
 	public string lasthitter; // time left of invincibility (0 if not invincible)
 
 	[SyncVar] 
-	public int bombs;
+	public int numberOfBombs;
 
+	[SyncVar] 
+	public int bombDamage;
 
 	//    ====================    UI objects for display on the client    ====================    //
 
@@ -58,8 +60,8 @@ public class combat_script : NetworkBehaviour {
 		health = maxHealth;
 		attack = 2;
 		invincTimer = 0;
-		bombs = 0;
-
+		numberOfBombs = 0;
+		bombDamage = 3;
 	}
 
 	// Update is called once per frame
@@ -72,6 +74,10 @@ public class combat_script : NetworkBehaviour {
 			invincTimer -= Time.deltaTime;
 		}
 		healthText.text = "HP: " + health;
+
+		if (Input.GetKeyDown (KeyCode.Mouse1)) {
+			Cmd_spawnBomb ();
+		}
 	}
 
 	// runs whenever a tear hits this gameobject
@@ -94,10 +100,16 @@ public class combat_script : NetworkBehaviour {
 	}
 
 
-	public void OnBombHit(){
+	public void OnBombPickHit(){
 		if (!isServer)
 			return;
 		Cmd_changeBombs ();
+	}
+
+	public void OnBombExplosion(int damage){
+		if (!isServer)
+			return;
+		Cmd_changeHealth (damage);
 	}
 
 	//    ====================    Server Functions    ====================    //
@@ -130,10 +142,21 @@ public class combat_script : NetworkBehaviour {
 
 	[Command]
 	void Cmd_changeBombs(){
-		bombs++;
+		numberOfBombs++;
 	}
 
-
+	[Command]
+	void Cmd_spawnBomb(){
+		if (numberOfBombs > 0) {
+			numberOfBombs--;
+			GameObject newBomb = (GameObject)Instantiate (bomb, transform.position, Quaternion.identity);
+			newBomb.GetComponent<bomb_script> ().timer = 1;
+			newBomb.GetComponent<bomb_script> ().damage = bombDamage;
+			newBomb.GetComponents<CircleCollider2D> ()[1].enabled = false;
+			newBomb.GetComponent<PointEffector2D> ().forceMagnitude = 10000;
+			NetworkServer.Spawn (newBomb);
+		}
+	}
 	//    ====================    Client Only Commands    ====================    //
 
 

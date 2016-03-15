@@ -28,7 +28,7 @@ public class tear_script : NetworkBehaviour {
 
 	[Server]
 	void Cmd_tearCollision(Collider2D other){
-		if (other.gameObject.tag != "Tear" && other.name != shooter)
+		if (other.gameObject.tag != "Tear" && other.name != shooter && other.name != "Bomb")
 		{
 			if (other.gameObject.tag == "Player") {
 				other.gameObject.SendMessage ("OnTearHit", gameObject);

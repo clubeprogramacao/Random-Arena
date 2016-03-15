@@ -15,7 +15,6 @@ public class GameMaster_script :NetworkBehaviour {
 
 	// Use this for initialization
 
-	[ServerCallback]
 	void Start () {
 		if (!isServer)
 			return;
@@ -24,18 +23,16 @@ public class GameMaster_script :NetworkBehaviour {
 	}
 	
 	// Update is called once per frame
-	[ServerCallback]
 	void Update () {
 		if (!isServer)
 			return;
 
 		if (checkSpawnTime ()) {
-			spawnItem (obj[1],new Vector2(Random.Range (-20,20),Random.Range (-10,10)));
+			Cmd_spawnBomb (new Vector2(Random.Range (-20,20),Random.Range (-10,10)));
 
 		}
 	}
 
-	[ServerCallback]
 	bool checkSpawnTime(){
 		if (itemSpawnCountdown > 0) {
 			itemSpawnCountdown -= Time.deltaTime;
@@ -46,9 +43,9 @@ public class GameMaster_script :NetworkBehaviour {
 		}
 	}
 
-	[ServerCallback]
-	void spawnItem(GameObject spawnObj, Vector2 trans){
-		GameObject newOnj = (GameObject)Instantiate (spawnObj, trans, Quaternion.identity);
-		NetworkServer.Spawn (newOnj);
+	[Command]
+	void Cmd_spawnBomb(Vector2 trans){
+		GameObject newObj = (GameObject)Instantiate (obj[1], trans, Quaternion.identity);
+		NetworkServer.Spawn (newObj);
 	}
 }
