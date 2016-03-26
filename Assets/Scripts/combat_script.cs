@@ -24,7 +24,7 @@ public class combat_script : NetworkBehaviour {
 	public float invincTimer; // time left of invincibility (0 if not invincible)
 
 	[SyncVar] 
-	public string lasthitter; // time left of invincibility (0 if not invincible)
+	public string lasthitter; 
 
 	[SyncVar] 
 	public int numberOfBombs;
@@ -60,7 +60,7 @@ public class combat_script : NetworkBehaviour {
 		health = maxHealth;
 		attack = 2;
 		invincTimer = 0;
-		numberOfBombs = 0;
+		numberOfBombs = 10;
 		bombDamage = 3;
 	}
 
@@ -78,6 +78,10 @@ public class combat_script : NetworkBehaviour {
 		if (Input.GetKeyDown (KeyCode.Mouse1)) {
 			Cmd_spawnBomb ();
 		}
+
+		if (isServer && health <= 0) {
+			respawn ();
+		}
 	}
 
 	// runs whenever a tear hits this gameobject
@@ -87,7 +91,8 @@ public class combat_script : NetworkBehaviour {
 		float tearDamage = tearHit.GetComponent<tear_script> ().tearStrength;
 		string tearShooter =  tearHit.GetComponent<tear_script> ().shooter;
 		Vector2 tearDirection = tearHit.GetComponent<tear_script> ().direction;
-		Cmd_knockBack (100f,tearDirection);
+		if(invincTimer <= 0)
+			Cmd_knockBack (100f,tearDirection);
 		Cmd_changeHealth (-tearDamage);
 		lasthitter = tearShooter;
 	}
@@ -114,23 +119,40 @@ public class combat_script : NetworkBehaviour {
 
 	//    ====================    Server Functions    ====================    //
 
-
+	[Server]
+	void respawn(){
+		
+		health = maxHealth;
+		transform.position = Vector3.zero;
+		GetComponent<Rigidbody2D> ().velocity = Vector2.zero;
+		//Rpc_respawn ();
+	}
 
 	// changes player health (to values between 0 and maxHealth)
 	[Command]
 	void Cmd_changeHealth(float healthDiff){
-		if (health + healthDiff <= 0) {
-			// he's dead
-			health = maxHealth;
-			transform.position = Vector3.zero;
-			GetComponent<Rigidbody2D> ().velocity = Vector2.zero;
-			Rpc_respawn ();
-		} else if (health + healthDiff > maxHealth) {
-			health = maxHealth;
-		} else {
+
+
+		if (healthDiff < 0) { // in case of damage
+			if (invincTimer <= 0) { // in case of not invincible
+				health += healthDiff;
+				invincTimer = 1; 
+			}
+		} else { // in case of heal
 			health += healthDiff;
 		}
+		// crop health overflow
+		if (health > maxHealth)
+			health = maxHealth;
+
+		// death
+		if (health <= 0) {
+			health = 0;
+		}
+
 	}
+
+
 
 	// knockback on tear hit
 	[Command]
@@ -152,8 +174,6 @@ public class combat_script : NetworkBehaviour {
 			GameObject newBomb = (GameObject)Instantiate (bomb, transform.position, Quaternion.identity);
 			newBomb.GetComponent<bomb_script> ().timer = 1;
 			newBomb.GetComponent<bomb_script> ().damage = bombDamage;
-			newBomb.GetComponents<CircleCollider2D> ()[1].enabled = false;
-			newBomb.GetComponent<PointEffector2D> ().forceMagnitude = 10000;
 			NetworkServer.Spawn (newBomb);
 		}
 	}
