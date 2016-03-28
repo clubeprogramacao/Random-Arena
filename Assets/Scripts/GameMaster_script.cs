@@ -19,12 +19,12 @@ public class GameMaster_script :NetworkBehaviour {
 			return;
 		itemSpawnTime = 0.75f;
 		itemSpawnCountdown = itemSpawnTime;
-		/*
+		
 		for (int i = -20; i<=20; i++){
 			for (int j = -10; j <= 10; j++) {
 				Cmd_spawnBomb (new Vector2(i,j));
 			}
-		}*/
+		}
 
 
 
@@ -63,11 +63,12 @@ public class GameMaster_script :NetworkBehaviour {
 
 	[Command]
 	void Cmd_spawnBomb(Vector2 trans){
-		GameObject newObj = (GameObject)Instantiate (obj [2], trans, Quaternion.identity);
+		//GameObject newObj = (GameObject)Instantiate (obj [1], trans, Quaternion.identity);
+        /*
 		newObj.GetComponent<bomb_script> ().damage = 1;
 		newObj.GetComponent<bomb_script> ().radius = 3.5f;
 		newObj.GetComponent<bomb_script> ().knockback = 1000;
-		newObj.GetComponent<bomb_script> ().timer = 0.5f;
-		NetworkServer.Spawn (newObj);
+		newObj.GetComponent<bomb_script> ().timer = 0.5f;*/
+		//NetworkServer.Spawn (newObj);
 	}
 }

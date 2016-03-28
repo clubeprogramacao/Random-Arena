@@ -40,16 +40,18 @@ public class bomb_script : NetworkBehaviour {
 			//gameObject.GetComponents <CircleCollider2D> ()[1].enabled = true;
 			Collider2D[] colliders = Physics2D.OverlapCircleAll(gameObject.transform.position, radius);
 			foreach (Collider2D col in colliders) {
-				if (col.attachedRigidbody == null)
-					continue;
 				
-				//if (col.tag == "Player") {
 				Vector2 dist = (col.transform.position - transform.position);
-				col.GetComponent<Rigidbody2D> ().AddForce (dist.normalized*knockback,ForceMode2D.Impulse);
+                if (col.name == "Rock")
+                {
+                    col.SendMessage("OnBombHit", dist);
+                }
+				if (col.attachedRigidbody != null)
+				    col.GetComponent<Rigidbody2D> ().AddForce (dist.normalized*knockback,ForceMode2D.Impulse);
+
 				if (col.GetComponent<combat_script> () != null) {
 					col.SendMessage ("OnBombExplosion", -damage);
 				}
-				//}
 			}
 			Destroy (gameObject);
 		}
