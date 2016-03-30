@@ -42,7 +42,7 @@ public class bomb_script : NetworkBehaviour {
 			foreach (Collider2D col in colliders) {
 				
 				Vector2 dist = (col.transform.position - transform.position);
-                if (col.tag == "Rock")
+                if (col.tag == "Rock") 
                 {
                     col.SendMessage("OnBombHit", dist);
                 }

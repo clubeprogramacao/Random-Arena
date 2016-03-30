@@ -49,7 +49,7 @@ public class combat_script : NetworkBehaviour {
 
 		if (isClient) {
 
-			healthText = GameObject.Find ("Text").GetComponent <Text> ();
+			healthText = GameObject.Find ("Health").GetComponent <Text> ();
 
 		}
 		if (!isServer)
