@@ -87,8 +87,8 @@ public class playerMovement_script : NetworkBehaviour
             return;
         if (col.name == "Minimap")
         {
-                room = col.transform.position+Vector3.up*4.5f;
-                Rpc_changeCamera(room);
+            room = col.transform.position+Vector3.up*4.5f;
+            Rpc_changeCamera(room);
         }
         
     }
@@ -100,9 +100,10 @@ public class playerMovement_script : NetworkBehaviour
         if (col.name == "Minimap")
         {
             col.gameObject.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 255);
-
         }
     }
+    
+
     
     void OnTriggerExit2D(Collider2D col)
     {
@@ -117,8 +118,6 @@ public class playerMovement_script : NetworkBehaviour
     }
 
     //    ====================    Server Only Commands    ====================    //
-
-
     // updates the movement variables on server
     [Command]
 	void Cmd_setInputs(float newH, float newV){
@@ -161,6 +160,7 @@ public class playerMovement_script : NetworkBehaviour
     {
         if (!isLocalPlayer)
             return;
+
         GameObject cam = GameObject.Find("Main Camera");
         Vector3 camPos = cam.transform.position;
         Vector3 newPos = new Vector3(room.x, room.y, camPos.z);

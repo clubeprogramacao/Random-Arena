@@ -61,13 +61,8 @@ public class GameMaster_script :NetworkBehaviour {
 			return true;
 		}
 	}
-
-    public void rageQuit()
-    {
-        SceneManager.LoadScene("Main Menu");
-
-    }
-
+    
+    
 	[Command]
 	void Cmd_spawnBomb(Vector2 trans){
 		//GameObject newObj = (GameObject)Instantiate (obj [1], trans, Quaternion.identity);
