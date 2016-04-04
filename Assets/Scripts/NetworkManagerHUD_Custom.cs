@@ -23,7 +23,7 @@ namespace UnityEngine.Networking
 			manager = GetComponent<NetworkManager>();
 			canv = GameObject.Find ("Canvas");
 
-		}
+        }
 
 		public void OnBack(){
 			manager.StopHost ();
@@ -43,9 +43,7 @@ namespace UnityEngine.Networking
 			manager.matchMaker.CreateMatch (server_Name, manager.matchSize, true, server_Password, manager.OnMatchCreate);
 		}
 
-		public void rageQuit(){
-			manager.StopHost();
-		}
+		
 
 		public void OnFindMatch(){
 			manager.matchMaker.ListMatches(0,20, "", manager.OnMatchList);

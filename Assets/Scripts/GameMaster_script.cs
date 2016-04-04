@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameMaster_script :NetworkBehaviour {
 
@@ -60,7 +61,8 @@ public class GameMaster_script :NetworkBehaviour {
 			return true;
 		}
 	}
-
+    
+    
 	[Command]
 	void Cmd_spawnBomb(Vector2 trans){
 		//GameObject newObj = (GameObject)Instantiate (obj [1], trans, Quaternion.identity);
