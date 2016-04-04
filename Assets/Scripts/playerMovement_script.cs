@@ -16,6 +16,9 @@ public class playerMovement_script : NetworkBehaviour
 
 	public Rigidbody2D rb2d; // link to player physics. Recieves forces, has velocity
 
+    [SyncVar]
+    public Vector2 room;
+
 	[SyncVar]
 	public int playerSpeed; // acceleration increments when player starts to walk
 
@@ -25,7 +28,8 @@ public class playerMovement_script : NetworkBehaviour
 	[SyncVar]
 	public float v; // horizontal inputs < -1 | 0 | +1 > // vertical inputs 	 < -1 | 0 | +1 >
 
-    
+    [SyncVar]
+    public bool canMove;
 
 	//    ====================    Local Commands    ====================    //
 
@@ -36,6 +40,8 @@ public class playerMovement_script : NetworkBehaviour
         gameObject.name = "[Player]" + GetInstanceID().ToString();
 		rb2d = GetComponent<Rigidbody2D>();
 		playerSpeed = 33;
+        if (isServer)
+            canMove = true;
 	}
 	
 	// Update is called once per frame
@@ -71,16 +77,51 @@ public class playerMovement_script : NetworkBehaviour
 	// add forces to player right away
 	void predictMovement(){
 		if(!isServer)
-		rb2d.AddForce(new Vector2(h * playerSpeed, v * playerSpeed),ForceMode2D.Impulse);
+		    rb2d.AddForce(new Vector2(h * playerSpeed, v * playerSpeed),ForceMode2D.Impulse);
 	}
+    
+    [Server]
+    void OnTriggerStay2D(Collider2D col)
+    {
+        if (!isServer)
+            return;
+        if (col.name == "Minimap")
+        {
+            room = col.transform.position+Vector3.up*4.5f;
+            Rpc_changeCamera(room);
+
+        }
+        
+    }
+    
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if (!isLocalPlayer)
+            return;
+        if (col.name == "Minimap")
+        {
+            col.gameObject.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 255);
+
+        }
+    }
+    
+    void OnTriggerExit2D(Collider2D col)
+    {
+        if (!isLocalPlayer)
+            return;
+        if (col.name == "Minimap")
+        {
+            col.gameObject.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 100);
+
+        }
+
+    }
+
+    //    ====================    Server Only Commands    ====================    //
 
 
-
-	//    ====================    Server Only Commands    ====================    //
-
-
-	// updates the movement variables on server
-	[Command]
+    // updates the movement variables on server
+    [Command]
 	void Cmd_setInputs(float newH, float newV){
 		h = newH;
 		v = newV;
@@ -90,6 +131,8 @@ public class playerMovement_script : NetworkBehaviour
 	[Command]
 	void Cmd_move()
 	{
+        if (!canMove)
+            return;
 		rb2d.AddForce(new Vector2(h * playerSpeed, v * playerSpeed),ForceMode2D.Impulse);
 		Rpc_move (rb2d.position, rb2d.velocity);
 	}
@@ -114,8 +157,26 @@ public class playerMovement_script : NetworkBehaviour
 		
 	}
 
+    [ClientRpc]
+    void Rpc_changeCamera(Vector2 pos)
+    {
+        if (!isLocalPlayer)
+            return;
+        Debug.Log(pos);
+        GameObject cam = GameObject.Find("Main Camera");
+        Vector3 camPos = cam.transform.position;
+        Vector3 newPos = new Vector3(room.x, room.y, camPos.z);
+        if (Mathf.Abs(Vector3.Magnitude(camPos - newPos)) <= 2) {
+            camPos = newPos;
+            canMove = true;
+        }
+        else {
+            camPos = new Vector3(Mathf.Lerp(camPos.x, room.x, 0.3f), Mathf.Lerp(camPos.y, room.y, 0.5f), camPos.z);
+            canMove = false;
+        }
+        cam.transform.position = camPos;
+    }
 
-    
 
 
 }

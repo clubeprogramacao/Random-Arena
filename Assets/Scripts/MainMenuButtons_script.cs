@@ -9,23 +9,29 @@ public class MainMenuButtons_script : NetworkBehaviour {
 
 	[SerializeField] public GameObject buttonContinue, buttonBack;
 
-	[SerializeField] public GameObject buttonFind,  roomButton;
+	[SerializeField] public GameObject buttonFind,  roomButton, cont;
 
 	[SerializeField] public GameObject buttonCreate, buttonCreateOk, roomCreateNameInput, roomCreatePasswordInput;
 
-	[SerializeField] public GameObject buttonJoinOk, roomJoinName, roomJoinPasswordInput;
+	[SerializeField] public GameObject buttonJoinOk, roomJoinName, roomJoinPasswordInput, roomJoinArea;
 
+	[SerializeField] public RectTransform area;
 
 	public string roomNameCreate, roomNameJoin;
 	public string roomPasswordCreate, roomPasswordJoin;
 	private bool lookingForMatches;
 
-
+	public int ii;
 
 	void Start()
 	{
 		lookingForMatches = false;
 		objectNetwork = GameObject.Find ("NetworkManager");
+		cont = GameObject.Find ("Content");
+		area = cont.GetComponent<RectTransform> ();
+		area.sizeDelta = new Vector2 (0.5f, 40);
+		ii = 0;
+
 		buttonContinue.SetActive (true); 
 		buttonBack.SetActive (false);
 
@@ -38,6 +44,7 @@ public class MainMenuButtons_script : NetworkBehaviour {
 
 		buttonJoinOk.SetActive (false);
 		roomJoinName.SetActive (false);
+		roomJoinArea.SetActive (false);
 		roomJoinPasswordInput.SetActive (false);
 	}
 
@@ -57,6 +64,7 @@ public class MainMenuButtons_script : NetworkBehaviour {
 
 		buttonJoinOk.SetActive (false);
 		roomJoinName.SetActive (false);
+		roomJoinArea.SetActive (false);
 		roomJoinPasswordInput.SetActive (false);
 
 		foreach ( GameObject button in GameObject.FindGameObjectsWithTag ("room button")){
@@ -97,6 +105,7 @@ public class MainMenuButtons_script : NetworkBehaviour {
 		
 		buttonCreate.SetActive (false);
 		buttonFind.SetActive (false);
+		roomJoinArea.SetActive (true);
 
 		lookingForMatches = true;
 		StartCoroutine ("FindMatchCRoutine");
@@ -118,12 +127,39 @@ public class MainMenuButtons_script : NetworkBehaviour {
 		string matchName = match [0];
 
 		GameObject newButton = Instantiate (roomButton, new Vector3(0f,0f,0f), Quaternion.identity) as GameObject;
+		newButton.name = i.ToString () + ")" + match[2];
 		newButton.GetComponentInChildren<Text> ().text = i + ") " + matchName;
-		newButton.transform.SetParent (GameObject.Find ("Canvas").transform);
-		newButton.GetComponent<RectTransform> ().position = new Vector3(17,6-2*i,0);
-			
-	}
+		cont = GameObject.Find ("Content");
+		newButton.transform.SetParent (cont.transform,false);
+		area = cont.GetComponent<RectTransform> ();
 
+		// Reposition everything because unity sux
+		int j = 1;
+		foreach (GameObject but in GameObject.FindGameObjectsWithTag ("room button")) {
+
+			area.sizeDelta = new Vector2 (0.8f,15+(45*j));
+			but.transform.localPosition = new Vector2 (0, 15-(40 * j-1));
+
+			j++;
+		}
+	}
+	/*
+	void Update () {
+		if(Input.GetKeyDown (KeyCode.Mouse1)){
+			ii++;
+			GameObject newButton = (GameObject)Instantiate (roomButton,new Vector2(0f,0f),Quaternion.identity);
+			newButton.name = "Button " + ii;
+			area.sizeDelta += new Vector2(0,40);
+			newButton.transform.SetParent (cont.transform,false);
+			newButton.transform.localPosition = new Vector2 (0,-(40*ii));
+			int j = 1;
+			foreach (GameObject but in GameObject.FindGameObjectsWithTag ("room button")) {
+				but.transform.localPosition = new Vector2 (0, -(40 * j));
+				j++;
+			}
+		}
+	}
+*/
 	// this function is run on the button prefab
 	public void OnJoinMatchClick(Text input){
 		
@@ -142,6 +178,9 @@ public class MainMenuButtons_script : NetworkBehaviour {
 			}
 			if (obj.gameObject.name == "Join Ok") {
 				obj.gameObject.SetActive (true);
+			}
+			if (obj.gameObject.name == "Scroll View") {
+				obj.gameObject.SetActive (false);
 			}
 		}
 

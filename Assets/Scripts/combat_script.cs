@@ -6,37 +6,31 @@ using UnityEngine.UI;
 public class combat_script : NetworkBehaviour {
 
 
+	public GameObject bomb;
 
 	//    ====================    Sync Variables (updated on Server)    ====================    //
 
 
+	[SyncVar] 
+	public float health; // current health
 
-	[SyncVar (hook = "changeHealth")] public float health; // current health
-	void changeHealth(float newHealth){
-		health = newHealth;
-	}
+	[SyncVar] 
+	public float maxHealth; // max health
 
-	[SyncVar (hook = "changeMaxHealth")] public float maxHealth; // max health
-	void changeMaxHealth(float newMaxHealth){
-		maxHealth = newMaxHealth;
-	}
+	[SyncVar] 
+	public float attack; // how much damage does the player have
 
-	[SyncVar (hook = "changeAttack")] public float attack; // how much damage does the player have
-	void changeAttack(float newAttack){
-		attack = newAttack;
-	}
+	[SyncVar] 
+	public float invincTimer; // time left of invincibility (0 if not invincible)
 
-	[SyncVar (hook = "changeInvincTimer")] public float invincTimer; // time left of invincibility (0 if not invincible)
-	void changeInvincTimer(float newInvincTimer){
-		invincTimer = newInvincTimer;
-	}
+	[SyncVar] 
+	public string lasthitter; 
 
-	[SyncVar (hook = "changeLasthitter")] public string lasthitter; // time left of invincibility (0 if not invincible)
-	void changeLasthitter(string newLasthitter){
-		lasthitter = newLasthitter;
-	}
-	[SyncVar] public int bombs;
+	[SyncVar] 
+	public int numberOfBombs;
 
+	[SyncVar] 
+	public int bombDamage;
 
 	//    ====================    UI objects for display on the client    ====================    //
 
@@ -52,14 +46,22 @@ public class combat_script : NetworkBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		healthText = GameObject.Find ("Text").GetComponent <Text> ();
+
+		if (isClient) {
+
+			healthText = GameObject.Find ("Health").GetComponent <Text> ();
+
+		}
+		if (!isServer)
+			return;
+		
 
 		maxHealth = 10;
 		health = maxHealth;
 		attack = 2;
 		invincTimer = 0;
-		bombs = 0;
-
+		numberOfBombs = 10;
+		bombDamage = 3;
 	}
 
 	// Update is called once per frame
@@ -72,6 +74,14 @@ public class combat_script : NetworkBehaviour {
 			invincTimer -= Time.deltaTime;
 		}
 		healthText.text = "HP: " + health;
+
+		if (Input.GetKeyDown (KeyCode.Mouse1)) {
+			Cmd_spawnBomb ();
+		}
+
+		if (isServer && health <= 0) {
+			respawn ();
+		}
 	}
 
 	// runs whenever a tear hits this gameobject
@@ -81,9 +91,10 @@ public class combat_script : NetworkBehaviour {
 		float tearDamage = tearHit.GetComponent<tear_script> ().tearStrength;
 		string tearShooter =  tearHit.GetComponent<tear_script> ().shooter;
 		Vector2 tearDirection = tearHit.GetComponent<tear_script> ().direction;
-		Cmd_knockBack (100f,tearDirection);
+		if(invincTimer <= 0)
+			Cmd_knockBack (100f,tearDirection);
 		Cmd_changeHealth (-tearDamage);
-		changeLasthitter (tearShooter);
+		lasthitter = tearShooter;
 	}
 
 	public void OnHeartHit(GameObject heart){
@@ -94,49 +105,82 @@ public class combat_script : NetworkBehaviour {
 	}
 
 
-	public void OnBombHit(){
+	public void OnBombPickHit(){
 		if (!isServer)
 			return;
 		Cmd_changeBombs ();
 	}
 
+	public void OnBombExplosion(int damage){
+		if (!isServer)
+			return;
+		Cmd_changeHealth (damage);
+	}
+
 	//    ====================    Server Functions    ====================    //
 
-
+	[Server]
+	void respawn(){
+		
+		health = maxHealth;
+		transform.position = Vector3.zero;
+		GetComponent<Rigidbody2D> ().velocity = Vector2.zero;
+		//Rpc_respawn ();
+	}
 
 	// changes player health (to values between 0 and maxHealth)
 	[Command]
 	void Cmd_changeHealth(float healthDiff){
-		if (health + healthDiff <= 0) {
-			// he's dead
-			health = maxHealth;
-			transform.position = Vector3.zero;
-			GetComponent<Rigidbody2D> ().velocity = Vector2.zero;
-			Rpc_respawn ();
-		} else if (health + healthDiff > maxHealth) {
-			changeHealth(maxHealth);
-		} else {
-			changeHealth(health + healthDiff);
+
+
+		if (healthDiff < 0) { // in case of damage
+			if (invincTimer <= 0) { // in case of not invincible
+				health += healthDiff;
+				invincTimer = 1; 
+			}
+		} else { // in case of heal
+			health += healthDiff;
 		}
+		// crop health overflow
+		if (health > maxHealth)
+			health = maxHealth;
+
+		// death
+		if (health <= 0) {
+			health = 0;
+		}
+
 	}
 
-	// applies an impulse force to the object
+
+
+	// knockback on tear hit
 	[Command]
 	void Cmd_knockBack(float intensity, Vector2 direction){
 		gameObject.GetComponent<Rigidbody2D> ().AddForce (direction*intensity,ForceMode2D.Impulse);
-		Rpc_knockBack (intensity,direction);
+		//Rpc_knockBack (intensity,direction);
 	}
+
 
 	[Command]
 	void Cmd_changeBombs(){
-		bombs++;
+		numberOfBombs++;
 	}
 
-
+	[Command]
+	void Cmd_spawnBomb(){
+		if (numberOfBombs > 0) {
+			numberOfBombs--;
+			GameObject newBomb = (GameObject)Instantiate (bomb, transform.position, Quaternion.identity);
+			newBomb.GetComponent<bomb_script> ().timer = 1;
+			newBomb.GetComponent<bomb_script> ().damage = bombDamage;
+			NetworkServer.Spawn (newBomb);
+		}
+	}
 	//    ====================    Client Only Commands    ====================    //
 
 
-
+	// sets pos to 0,0
 	[ClientRpc]
 	void Rpc_respawn(){
 		if (isLocalPlayer) {
@@ -145,10 +189,11 @@ public class combat_script : NetworkBehaviour {
 		}
 	}
 
+	// knockback on tear hit
 	[ClientRpc]
 	void Rpc_knockBack(float intensity, Vector2 direction){
 		gameObject.GetComponent<Rigidbody2D> ().AddForce (direction*intensity,ForceMode2D.Impulse);
-	}
+	} 
 
 
 }

@@ -4,7 +4,10 @@ using UnityEngine.Networking;
 
 public class playerShoot_script : NetworkBehaviour {
 
-	public GameObject tear; // prefab that will become the newTear
+	public GameObject[] tear; // prefab that will become the newTear
+
+	[SyncVar]
+	public int tearSelecter;
 
 	[SyncVar]
 	public float displacementH;
@@ -21,21 +24,24 @@ public class playerShoot_script : NetworkBehaviour {
 	[SyncVar]
 	public float tearRate;   // tears per second
 
+	// only server will use this
 	public float tearTimer;
 
+	[SyncVar]
 	public int facing;
-
 	void Start()
 	{
-		if (!isLocalPlayer)
+		if (!isLocalPlayer || !isServer)
 			return;
 		/* Uncomment to override Default setup
 		tearSpeed = 10;
 		tearDistance = 20;
 		tearRate = 1.5f;
 		*/
+		tearSelecter = 1;
 		tearTimer = 0;
-		facing = 6;
+		facing = 2;
+		tearSelecter = 0;
 	} // Start
 
 	// Update is called once per frame
@@ -44,19 +50,14 @@ public class playerShoot_script : NetworkBehaviour {
 		if (!isLocalPlayer)
 			return;
 
-		// check direction (mouse pos
-
+		// check direction (mouse pos)
+		facing = getDirection (Input.mousePosition, transform.position);
+		Cmd_updateDirection (facing);
 		// fire tear
-		if (Input.GetKey (KeyCode.Mouse0) && tearTimer <= 0) {
-
-			facing = getDirection (Input.mousePosition, transform.position);
-
+		if (Input.GetKey (KeyCode.Mouse0)) {
 			Cmd_shootTear (facing);
-			tearTimer = 1/tearRate;
 		}
 		// decrease timers
-		if (tearTimer > 0)
-			tearTimer -= Time.deltaTime;
 	}// Update
 
 
@@ -83,6 +84,12 @@ public class playerShoot_script : NetworkBehaviour {
 	// shoots the tear on the server, and the server spawns it on every client (including this one)
 	[Command]
 	void Cmd_shootTear(int dir){
+
+		if (tearTimer > 0) {
+			tearTimer -= Time.deltaTime;
+			return;
+		}
+		tearTimer = 1 / tearRate;
 		GameObject newTear;
 
 		Vector2 direction2;
@@ -118,7 +125,7 @@ public class playerShoot_script : NetworkBehaviour {
 			break;
 			
 		} // switch
-		newTear = (GameObject)Instantiate (tear, transform.position + direction3 * displacement, Quaternion.identity);
+		newTear = (GameObject)Instantiate (tear[0], transform.position + direction3 * displacement, Quaternion.identity);
 		newTear.GetComponent<Rigidbody2D> ().AddForce (direction2 * tearSpeed, ForceMode2D.Impulse);
 		newTear.GetComponent<tear_script> ().direction = direction2;
 
@@ -127,5 +134,11 @@ public class playerShoot_script : NetworkBehaviour {
 		Destroy (newTear, tearDistance / tearSpeed);
 		NetworkServer.Spawn (newTear);
 	} // Cmd_shootTear
+
+	[Command]
+	void Cmd_updateDirection(int dir){
+		facing = dir;
+	}
+
 
 }// playerShoot_script

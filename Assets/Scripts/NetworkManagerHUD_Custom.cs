@@ -49,23 +49,29 @@ namespace UnityEngine.Networking
 
 		public void OnFindMatch(){
 			manager.matchMaker.ListMatches(0,20, "", manager.OnMatchList);
-
-			int i = 0;
+			//Debug.Log ("====================================================================");
+			int i = 1;
 			if (manager.matches != null) {
 				
 				foreach (var match in manager.matches) {
+					//Debug.Log ("MATCH\n " + match.networkId.ToString ());
 					bool alreadyExists = false;
 					foreach ( GameObject button in GameObject.FindGameObjectsWithTag ("room button")){
-						if (button.name == match.name) {
+						
+						if (button.name == i.ToString () + ")" + match.networkId.ToString ()) {
 							alreadyExists = true;
 						}
+						//Debug.Log (button.name + "    " + alreadyExists);
+						//Debug.Log ("Match: " + match.networkId.ToString () + "    Checking Button: " + button.name + alreadyExists);
 					}
-					if (alreadyExists)
-						continue;
-					string[] thisMatch = new string[] { match.name, i.ToString (), match.networkId.ToString ()};
+					if (!alreadyExists) {
+						string[] thisMatch = new string[] { match.name, i.ToString (), match.networkId.ToString () };
+
+						canv = GameObject.Find ("Canvas");
+						canv.SendMessage ("CreateMatchButton", thisMatch);
+						//Debug.Log ("xxxxxxxxxxxxxxxxxx Creating Button: " + match.name);
+					}
 					i++;
-					canv = GameObject.Find ("Canvas");
-					canv.SendMessage ("CreateMatchButton", thisMatch);
 				}
 			}
 		}

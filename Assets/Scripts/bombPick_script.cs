@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.Networking;
 
-public class FakeHeart_script : NetworkBehaviour {
+public class bombPick_script : NetworkBehaviour {
 
 
 
@@ -11,7 +11,7 @@ public class FakeHeart_script : NetworkBehaviour {
 		if (!isServer)
 			return;
 			
-		gameObject.name = "Bomb";
+		gameObject.name = "Bomb Pick";
 
 	}
 
@@ -26,7 +26,7 @@ public class FakeHeart_script : NetworkBehaviour {
 	void Cmd_fakeHeartCollision(Collision2D other){
 		if (other.gameObject.tag == "Player")
 		{
-			other.gameObject.SendMessage ("OnBombHit");
+			other.gameObject.SendMessage ("OnBombPickHit");
 			Destroy(gameObject);
 		}
 	}
