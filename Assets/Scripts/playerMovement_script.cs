@@ -87,7 +87,7 @@ public class playerMovement_script : NetworkBehaviour
             return;
         if (col.name == "Minimap")
         {
-            room = col.transform.position+Vector3.up*4.5f;
+            room = col.transform.position+Vector3.up*3.1f;
             Rpc_changeCamera(room);
         }
         

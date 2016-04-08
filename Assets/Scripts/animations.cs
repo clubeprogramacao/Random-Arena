@@ -11,6 +11,6 @@ public class animations : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		// up is far, down is near
-        gameObject.GetComponent<SpriteRenderer>().sortingOrder = -1*(int)gameObject.GetComponent<Rigidbody2D>().position.y;
+        gameObject.GetComponent<SpriteRenderer>().sortingOrder = -1*(int)gameObject.transform.position.y;
 	}
 }

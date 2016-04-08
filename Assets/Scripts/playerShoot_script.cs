@@ -19,7 +19,7 @@ public class playerShoot_script : NetworkBehaviour {
 	public int tearSpeed; // unitys per second
 
 	[SyncVar]
-	public float tearDistance; // unitys
+	public float tearDistance; // seconds
 
 	[SyncVar]
 	public float tearRate;   // tears per second
@@ -57,8 +57,14 @@ public class playerShoot_script : NetworkBehaviour {
 		if (Input.GetKey (KeyCode.Mouse0)) {
 			Cmd_shootTear (facing);
 		}
-		// decrease timers
-	}// Update
+        // decrease timers
+        if (tearTimer > 0 && isServer)
+        {
+            tearTimer -= Time.deltaTime;
+            if (tearTimer < 0)
+                tearTimer = 0;
+        }
+    }// Update
 
 
 	// returns direction the player is shooting (2=Down | 4=Left | 6=Right | 8=Up)
@@ -85,37 +91,51 @@ public class playerShoot_script : NetworkBehaviour {
 	[Command]
 	void Cmd_shootTear(int dir){
 
-		if (tearTimer > 0) {
-			tearTimer -= Time.deltaTime;
-			return;
-		}
+        if (tearTimer > 0)
+            return;
 		tearTimer = 1 / tearRate;
 		GameObject newTear;
-
-		Vector2 direction2;
+        Vector2 palyerVelocity = GetComponent<Rigidbody2D>().velocity; 
+        Vector2 direction2;
 		Vector3 direction3;
 		float displacement;
 		int speed = GetComponent<playerMovement_script> ().playerSpeed;
 
 		switch (dir){
 		case 2: // down
-			direction2 = new Vector2(GetComponent<Rigidbody2D>().velocity.x/speed, Vector2.down.y);
-			direction3 = Vector3.down;
+			direction2 = new Vector2(palyerVelocity.x/speed, Vector2.down.y);
+            if(palyerVelocity.y < 0)
+            {
+                direction2 += new Vector2(0f, -0.4f);
+            }
+            direction3 = Vector3.down;
 			displacement = displacementV;
 			break;
 		case 4: // left
-			direction2 = new Vector2(Vector2.left.x ,GetComponent<Rigidbody2D>().velocity.y/speed);
-			direction3 = Vector3.left;
+			direction2 = new Vector2(Vector2.left.x , palyerVelocity.y/speed);
+            if (palyerVelocity.x < 0)
+            { 
+                direction2 += new Vector2(-0.4f, 0f);
+                }
+            direction3 = Vector3.left;
 			displacement = displacementH;
 			break;
 		case 6: // right
-			direction2 = new Vector2(Vector2.right.x ,GetComponent<Rigidbody2D>().velocity.y/speed);
-			direction3 = Vector3.right;
+			direction2 = new Vector2(Vector2.right.x , palyerVelocity.y/speed);
+            if (palyerVelocity.x > 0)
+            {
+                direction2 += new Vector2(0.4f, 0f); 
+                }
+            direction3 = Vector3.right;
 			displacement = displacementH;
 			break;
 		case 8: // up
-			direction2 = new Vector2(GetComponent<Rigidbody2D>().velocity.x/speed, Vector2.up.y);
-			direction3 = Vector3.up;
+			direction2 = new Vector2(palyerVelocity.x/speed, Vector2.up.y);
+            if (palyerVelocity.y > 0)
+            {
+                direction2 += new Vector2(0f, 0.4f); 
+                }
+            direction3 = Vector3.up;
 			displacement = displacementV;
 			break;
 		default:
@@ -129,9 +149,9 @@ public class playerShoot_script : NetworkBehaviour {
 		newTear.GetComponent<Rigidbody2D> ().AddForce (direction2 * tearSpeed, ForceMode2D.Impulse);
 		newTear.GetComponent<tear_script> ().direction = direction2;
 
-		newTear.GetComponent<tear_script> ().shooter = gameObject.name;
+        newTear.GetComponent<tear_script> ().shooter = gameObject.name;
 		newTear.GetComponent<tear_script> ().tearStrength = gameObject.GetComponent<combat_script> ().attack;
-		Destroy (newTear, tearDistance / tearSpeed);
+		Destroy (newTear, tearDistance);
 		NetworkServer.Spawn (newTear);
 	} // Cmd_shootTear
 

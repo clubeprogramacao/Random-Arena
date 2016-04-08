@@ -29,7 +29,9 @@ public class Rock_script : NetworkBehaviour {
         {
             GetComponent<BoxCollider2D>().enabled = false;
             GetComponent<SpriteRenderer>().color = new Color(1,0,0,1);
+            GetComponent<SpriteRenderer>().sortingLayerName = "Stage";
             GetComponent<SpriteRenderer>().sortingOrder = -11;
+
         }
         else
         {
@@ -38,7 +40,8 @@ public class Rock_script : NetworkBehaviour {
             Vector2 v1 = transform.position;
             Vector2 v2 = v1;
             GetComponent<BoxCollider2D>().enabled = false;
-            GetComponent<SpriteRenderer>().color = holeFilled;
+            GetComponent<SpriteRenderer>().color = new Color(1, 0, 0, 1); //holeFilled;
+            GetComponent<SpriteRenderer>().sortingLayerName = "Stage";
             GetComponent<SpriteRenderer>().sortingOrder = -11;
             if (ang < 45) // right
             {
