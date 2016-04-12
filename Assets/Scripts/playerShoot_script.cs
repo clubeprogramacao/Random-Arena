@@ -24,11 +24,13 @@ public class playerShoot_script : NetworkBehaviour {
 	[SyncVar]
 	public float tearRate;   // tears per second
 
-	// only server will use this
-	public float tearTimer;
+	[SyncVar]
+	public float tearTimer; // cooldown on tear
 
 	[SyncVar]
 	public int facing;
+
+
 	void Start()
 	{
 		if (!isLocalPlayer || !isServer)
@@ -47,6 +49,10 @@ public class playerShoot_script : NetworkBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
+
+        if(isServer)
+            decreaseTimer();
+
 		if (!isLocalPlayer)
 			return;
 
@@ -58,12 +64,6 @@ public class playerShoot_script : NetworkBehaviour {
 			Cmd_shootTear (facing);
 		}
         // decrease timers
-        if (tearTimer > 0 && isServer)
-        {
-            tearTimer -= Time.deltaTime;
-            if (tearTimer < 0)
-                tearTimer = 0;
-        }
     }// Update
 
 
@@ -85,10 +85,22 @@ public class playerShoot_script : NetworkBehaviour {
 		}
 	} // getDirection
 
-	//    ====================    Server Functions    ====================    //
+    //    ====================    Server Functions    ====================    //
+    [Server]
+    void decreaseTimer()
+    {
+        if (tearTimer > 0)
+        {
+            tearTimer -= Time.deltaTime;
+        }
+            if (tearTimer < 0)
+            tearTimer = 0;
+        
+    }
 
-	// shoots the tear on the server, and the server spawns it on every client (including this one)
-	[Command]
+
+    // shoots the tear on the server, and the server spawns it on every client (including this one)
+    [Command]
 	void Cmd_shootTear(int dir){
 
         if (tearTimer > 0)
@@ -104,7 +116,7 @@ public class playerShoot_script : NetworkBehaviour {
 		switch (dir){
 		case 2: // down
 			direction2 = new Vector2(palyerVelocity.x/speed, Vector2.down.y);
-            if(palyerVelocity.y < 0)
+            if(palyerVelocity.y < -5)
             {
                 direction2 += new Vector2(0f, -0.4f);
             }
@@ -113,7 +125,7 @@ public class playerShoot_script : NetworkBehaviour {
 			break;
 		case 4: // left
 			direction2 = new Vector2(Vector2.left.x , palyerVelocity.y/speed);
-            if (palyerVelocity.x < 0)
+            if (palyerVelocity.x < -5)
             { 
                 direction2 += new Vector2(-0.4f, 0f);
                 }
@@ -122,16 +134,16 @@ public class playerShoot_script : NetworkBehaviour {
 			break;
 		case 6: // right
 			direction2 = new Vector2(Vector2.right.x , palyerVelocity.y/speed);
-            if (palyerVelocity.x > 0)
+            if (palyerVelocity.x > 5)
             {
-                direction2 += new Vector2(0.4f, 0f); 
+                direction2 += new Vector2(0.4f, 0f);
                 }
             direction3 = Vector3.right;
 			displacement = displacementH;
 			break;
 		case 8: // up
 			direction2 = new Vector2(palyerVelocity.x/speed, Vector2.up.y);
-            if (palyerVelocity.y > 0)
+            if (palyerVelocity.y > 5)
             {
                 direction2 += new Vector2(0f, 0.4f); 
                 }

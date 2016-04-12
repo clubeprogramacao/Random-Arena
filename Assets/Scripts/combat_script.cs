@@ -66,13 +66,18 @@ public class combat_script : NetworkBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		if (!isLocalPlayer)
+        if (invincTimer > 0)
+            GetComponent<SpriteRenderer>().color = new Color(1, 0, 0, 1);
+        else
+            GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+        if (isServer)
+            decreaseTimers();
+
+        if (!isLocalPlayer)
 			return;
 		
 		// inviciTimer --
-		if(invincTimer > 0){
-			invincTimer -= Time.deltaTime;
-		}
+		
 		healthText.text = "HP: " + health;
 
 		if (Input.GetKeyDown (KeyCode.Mouse1)) {
@@ -118,6 +123,17 @@ public class combat_script : NetworkBehaviour {
 	}
 
 	//    ====================    Server Functions    ====================    //
+
+        [Server]
+        void decreaseTimers()
+    {
+        if (invincTimer > 0)
+        {
+            invincTimer -= Time.deltaTime;
+            if (invincTimer < 0)
+                invincTimer = 0;
+        }
+    }
 
 	[Server]
 	void respawn(){

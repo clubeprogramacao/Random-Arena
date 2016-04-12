@@ -31,10 +31,6 @@ public class tear_script : NetworkBehaviour {
 			}
 			Destroy(gameObject);
 		}
-        if(other.tag == "Web")
-        {
-            GetComponent<Rigidbody2D>().AddForce(direction * -other.GetComponent<web_script>().drag, ForceMode2D.Impulse);
-        }
 	}
 
 }

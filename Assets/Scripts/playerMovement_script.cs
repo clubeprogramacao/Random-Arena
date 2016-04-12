@@ -90,7 +90,6 @@ public class playerMovement_script : NetworkBehaviour
             room = col.transform.position+Vector3.up*3.1f;
             Rpc_changeCamera(room);
         }
-        
     }
     
     void OnTriggerEnter2D(Collider2D col)
