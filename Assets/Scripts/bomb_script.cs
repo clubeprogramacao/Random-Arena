@@ -46,6 +46,11 @@ public class bomb_script : NetworkBehaviour {
                 {
                     col.SendMessage("OnBombHit", dist);
                 }
+                if(col.name == "Web")
+                {
+                    Debug.Log("BOOM" + col.name);
+                    col.SendMessage("OnBombHit");
+                }
 				if (col.attachedRigidbody != null)
 				    col.GetComponent<Rigidbody2D> ().AddForce (dist.normalized*knockback,ForceMode2D.Impulse);
 

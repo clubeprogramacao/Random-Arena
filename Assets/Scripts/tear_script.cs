@@ -29,6 +29,7 @@ public class tear_script : NetworkBehaviour {
 			if (other.gameObject.tag == "Player") {
 				other.gameObject.SendMessage ("OnTearHit", gameObject);
 			}
+            Debug.Log("destroy tear  " + other.tag);
 			Destroy(gameObject);
 		}
 	}
