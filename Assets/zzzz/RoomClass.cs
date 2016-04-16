@@ -9,7 +9,7 @@ public class RoomClass{
     }
     public enum DoorLock
     {
-        open, combat, key, coin, bomb, none
+        none, open, combat, key, coin, bomb
     }
     public enum FloorType
     {
@@ -17,36 +17,123 @@ public class RoomClass{
     }
     public enum Status
     {
-        exists, empty
+        exists, empty, blocked
+    }
+    public enum RoomType
+    {
+        normal, boss, treasure, shop, hidden
     }
 
-    public DoorFrame frameNorth;
-    public DoorFrame frameSouth;
-    public DoorFrame frameEast;
-    public DoorFrame frameWest;
+    public DoorFrame frameNorth = DoorFrame.none;
+    public DoorFrame frameSouth = DoorFrame.none;
+    public DoorFrame frameEast  = DoorFrame.none;
+    public DoorFrame frameWest  = DoorFrame.none;
 
-    public DoorLock lockNorth;
-    public DoorLock lockSouth;
-    public DoorLock lockEast;
-    public DoorLock lockWest;
+    public DoorLock lockNorth = DoorLock.none;
+    public DoorLock lockSouth = DoorLock.none;
+    public DoorLock lockEast  = DoorLock.none;
+    public DoorLock lockWest  = DoorLock.none;
 
-    public FloorType floor;
+    public FloorType floor = FloorType.normal;
+    public RoomType type = RoomType.normal;
+    public Status status = Status.empty;
 
-    public Status status;
-
-    public bool adjacentNorth;
-    public bool adjacentSouth;
-    public bool adjacentEast;
-    public bool adjacentWest;
+    public bool adjacentNorth = false;
+    public bool adjacentSouth = false;
+    public bool adjacentEast = false;
+    public bool adjacentWest = false;
 
     public Vector2 pos;
     
-    public RoomClass()
+
+    public int adjacentRooms()
     {
-        lockNorth = DoorLock.none;
-        lockSouth = DoorLock.none;
-        lockEast = DoorLock.none;
-        lockWest = DoorLock.none;
+        int count = 0;
+        if (adjacentNorth)
+        {
+            count++;
+        }
+        if (adjacentSouth)
+        {
+            count++;
+        }
+        if (adjacentEast)
+        {
+            count++;
+        }
+        if (adjacentWest)
+        {
+            count++;
+        }
+        return count;
     }
     
+    public void makeType(RoomType newRoomType)
+    {
+        DoorFrame thisframe = DoorFrame.none;
+        if(newRoomType == RoomType.boss)
+        {
+            type = RoomType.boss;
+            thisframe = DoorFrame.bones;
+        }
+        if (newRoomType == RoomType.hidden)
+        {
+            type = RoomType.hidden;
+            thisframe = DoorFrame.none;
+        }
+        if (newRoomType == RoomType.normal)
+        {
+            type = RoomType.normal;
+            thisframe = DoorFrame.wood;
+        }
+        if (newRoomType == RoomType.shop)
+        {
+            type = RoomType.shop;
+            thisframe = DoorFrame.wood;
+        }
+        if (newRoomType == RoomType.treasure)
+        {
+            type = RoomType.treasure;
+            thisframe = DoorFrame.gold;
+        }
+
+        if (adjacentNorth)
+        {
+            frameNorth = thisframe;
+        }
+        if (adjacentSouth)
+        {
+            frameSouth = thisframe;
+        }
+        if (adjacentEast)
+        {
+            frameEast = thisframe;
+        }
+        if (adjacentWest)
+        {
+            frameWest = thisframe;
+        }
+    }
+
+    public void makeFrames(DoorFrame newFrame, int[] door)
+    {
+        for(int i = 0; i< door.Length; i++) {
+            switch(door[i])
+            {
+                case 0: // North
+                    frameNorth = newFrame;
+                    break;
+                case 1: // South
+                    frameSouth = newFrame;
+                    break;
+                case 2: // East
+                    frameEast = newFrame;
+                    break;
+                case 3: // West
+                    frameWest = newFrame;
+                    break;
+                default: break;
+            }
+        }
+    }
 };
