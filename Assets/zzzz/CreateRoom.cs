@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CreateRoom : MonoBehaviour {
 
@@ -33,13 +34,13 @@ public class CreateRoom : MonoBehaviour {
 
         // Create GameObject Holder
         GameObject thisRoom = (GameObject)Instantiate(RoomHolder, new Vector3(x, y, 0), Quaternion.identity);
-        thisRoom.transform.parent = thisDungeon.transform;
+        thisRoom.transform.SetParent(thisDungeon.transform);
         thisRoom.name = "Room (" + x / 60 + ", " + y / 36 + ")";
 
         // Create the floor
 
         GameObject thisFloor = (GameObject)Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
-        thisFloor.transform.parent = thisRoom.transform;
+        thisFloor.transform.SetParent(thisRoom.transform);
 
         if (room.type == RoomClass.RoomType.normal)
             thisFloor.GetComponent<SpriteRenderer>().color = new Color(0xCD/255f, 0x71/255f, 0x5D/255f, 0xFF/255f);
@@ -51,22 +52,30 @@ public class CreateRoom : MonoBehaviour {
         if (room.status == RoomClass.Status.blocked)
         {
             thisFloor.GetComponent<SpriteRenderer>().color = new Color(1, 0, 0, 1);
-            return;
         }
 
         if (room.status == RoomClass.Status.empty)
         {
             thisFloor.GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 1);
-            return;
         }
+        if (room.floor == RoomClass.FloorType.first)
+        {
+            thisFloor.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+        }
+
+        thisFloor.name = room.status.ToString();
+
+        showValues(room, thisFloor.GetComponent<Text>());
         
-        thisFloor.name = room.type.ToString();
+
+        if (room.status == RoomClass.Status.empty || room.status == RoomClass.Status.blocked)
+            return;
 
         // Create the walls, the doors and the frames
-        GameObject thisNorthWall, thisNorthDoor, thisNorthBorder;
-        GameObject thisSouthWall, thisSouthDoor, thisSouthBorder;
-        GameObject thisEastWall, thisEastDoor, thisEastBorder;
-        GameObject thisWestWall, thisWestDoor, thisWestBorder;
+        GameObject thisNorthWall, thisNorthBorder;
+        GameObject thisSouthWall, thisSouthBorder;
+        GameObject thisEastWall, thisEastBorder;
+        GameObject thisWestWall, thisWestBorder;
 
         // North
         if (room.adjacentNorth)
@@ -79,7 +88,7 @@ public class CreateRoom : MonoBehaviour {
                 thisNorthBorder.GetComponent<SpriteRenderer>().color = new Color(0.5f, 0.5f, 0.5f, 1);
             if (room.frameNorth == RoomClass.DoorFrame.wood)
                 thisNorthBorder.GetComponent<SpriteRenderer>().color = new Color(0xCD / 255f, 0x71 / 255f, 0x5D / 255f, 0xFF / 255f);
-            thisNorthBorder.transform.parent = thisRoom.transform;
+            thisNorthBorder.transform.SetParent(thisRoom.transform);
         }
         else
             thisNorthWall = (GameObject)Instantiate(wallHorizontal, new Vector3(x, y + 16, 0), Quaternion.identity);
@@ -95,7 +104,7 @@ public class CreateRoom : MonoBehaviour {
                 thisSouthBorder.GetComponent<SpriteRenderer>().color = new Color(0.5f, 0.5f, 0.5f, 1);
             if (room.frameSouth == RoomClass.DoorFrame.wood)
                 thisSouthBorder.GetComponent<SpriteRenderer>().color = new Color(0xCD / 255f, 0x71 / 255f, 0x5D / 255f, 0xFF / 255f);
-            thisSouthBorder.transform.parent = thisRoom.transform;
+            thisSouthBorder.transform.SetParent(thisRoom.transform);
         }
         else
             thisSouthWall = (GameObject)Instantiate(wallHorizontal, new Vector3(x, y - 16, 0), Quaternion.identity);
@@ -111,7 +120,7 @@ public class CreateRoom : MonoBehaviour {
                 thisEastBorder.GetComponent<SpriteRenderer>().color = new Color(0.5f, 0.5f, 0.5f, 1);
             if (room.frameEast == RoomClass.DoorFrame.wood)
                 thisEastBorder.GetComponent<SpriteRenderer>().color = new Color(0xCD / 255f, 0x71 / 255f, 0x5D / 255f, 0xFF / 255f);
-            thisEastBorder.transform.parent = thisRoom.transform;
+            thisEastBorder.transform.SetParent(thisRoom.transform);
         }
         else
             thisEastWall = (GameObject)Instantiate(wallVertical, new Vector3(x + 28, y, 0), Quaternion.identity);
@@ -127,46 +136,43 @@ public class CreateRoom : MonoBehaviour {
                 thisWestBorder.GetComponent<SpriteRenderer>().color = new Color(0.5f, 0.5f, 0.5f, 1);
             if (room.frameWest == RoomClass.DoorFrame.wood)
                 thisWestBorder.GetComponent<SpriteRenderer>().color = new Color(0xCD / 255f, 0x71 / 255f, 0x5D / 255f, 0xFF / 255f);
-            thisWestBorder.transform.parent = thisRoom.transform;
+            thisWestBorder.transform.SetParent(thisRoom.transform);
         }
         else
             thisWestWall = (GameObject)Instantiate(wallVertical, new Vector3(x - 28, y, 0), Quaternion.identity);
 
         // Place them inside the Holder
         // walls
-        thisNorthWall.transform.parent = thisRoom.transform;
-        thisSouthWall.transform.parent = thisRoom.transform;
-        thisEastWall.transform.parent = thisRoom.transform;
-        thisWestWall.transform.parent = thisRoom.transform;
+        thisNorthWall.transform.SetParent(thisRoom.transform);
+        thisSouthWall.transform.SetParent(thisRoom.transform);
+        thisEastWall.transform.SetParent(thisRoom.transform);
+        thisWestWall.transform.SetParent(thisRoom.transform);
         // doors
 
         // frames
     }
     
-    public Color getColor(RoomClass room, string choice, int direction)
+    void showValues(RoomClass room, Text theText)
     {
-        switch (direction)
-        {
-            case 0:
-                if (choice == "frame")
-                {
-                    if (room.type == RoomClass.RoomType.treasure)
-                        return new Color(1, 1, 0, 1);
-                }
-                break;
-            case 1:
+        theText.text = "status: " + room.status.ToString() + '\n' +
+                                              "type: " + room.type.ToString() + '\n' +
+                                              "floor: " + room.floor.ToString() + '\n' +
+                                              "Numbre of adj rooms: " + room.adjacentRooms().ToString() + '\n' + '\n' +
 
-                break;
-            case 2:
+                                              "lockNorth: " + room.lockNorth.ToString() + '\n' +
+                                              "lockSouth: " + room.lockSouth.ToString() + '\n' +
+                                              "lockEast: " + room.lockEast.ToString() + '\n' +
+                                              "lockWest: " + room.lockWest.ToString() + '\n' + '\n' +
 
-                break;
-            case 3:
+                                              "frameNorth: " + room.frameNorth.ToString() + '\n' +
+                                              "frameSouth: " + room.frameSouth.ToString() + '\n' +
+                                              "frameEast: " + room.frameEast.ToString() + '\n' +
+                                              "frameWest: " + room.frameWest.ToString() + '\n' + '\n' +
 
-                break;
-            default: break;
-        }
-        
-        return new Color(0xCD / 255f, 0x71 / 255f, 0x5D / 255f, 0xFF / 255f);
+                                              "adjacentNorth: " + room.adjacentNorth.ToString() + '\n' +
+                                              "adjacentSouth: " + room.adjacentSouth.ToString() + '\n' +
+                                              "adjacentEast: " + room.adjacentEast.ToString() + '\n' +
+                                              "adjacentWest: " + room.adjacentWest.ToString() + '\n';
+
     }
-
 }
