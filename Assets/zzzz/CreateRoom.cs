@@ -1,12 +1,14 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking;
 
-public class CreateRoom : MonoBehaviour {
+public class CreateRoom : NetworkBehaviour {
 
     public GameObject Dungeon;
     public GameObject RoomHolder;
-    public GameObject floor;
+    public GameObject[] floor;
+    public GameObject spawn;
 
     // walls
     public GameObject wallHorizontalWithDoor;
@@ -15,15 +17,16 @@ public class CreateRoom : MonoBehaviour {
     public GameObject wallHorizontal;
     public GameObject wallVertical;
 
-    public GameObject doorFrame;
+    public GameObject[] doorFrame;
     public GameObject doorHole;
 
-    private GameObject thisDungeon;
+    public GameObject thisDungeon;
 
 	// Use this for initialization
-	void Start () {
+	void createDungeon () {
         thisDungeon = (GameObject)Instantiate(Dungeon, Vector3.zero, Quaternion.identity);
         thisDungeon.name = "Dungeon";
+        NetworkServer.Spawn(thisDungeon);
     }
 
 
@@ -31,42 +34,52 @@ public class CreateRoom : MonoBehaviour {
     {
         x *= 60;
         y *= 36;
+        thisDungeon = GameObject.Find("Dungeon");
+        if(thisDungeon == null)
+        {
+            createDungeon();
+        }
 
         // Create GameObject Holder
         GameObject thisRoom = (GameObject)Instantiate(RoomHolder, new Vector3(x, y, 0), Quaternion.identity);
-        thisRoom.transform.SetParent(thisDungeon.transform);
         thisRoom.name = "Room (" + x / 60 + ", " + y / 36 + ")";
+        thisRoom.transform.SetParent(thisDungeon.transform);
 
-        // Create the floor
-
-        GameObject thisFloor = (GameObject)Instantiate(floor, new Vector3(x, y, 0), Quaternion.identity);
-        thisFloor.transform.SetParent(thisRoom.transform);
-
-        if (room.type == RoomClass.RoomType.normal)
-            thisFloor.GetComponent<SpriteRenderer>().color = new Color(0xCD/255f, 0x71/255f, 0x5D/255f, 0xFF/255f);
-
-        if (room.type == RoomClass.RoomType.treasure)
-            thisFloor.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 0, 255);
-        if(room.type == RoomClass.RoomType.boss)
-            thisFloor.GetComponent<SpriteRenderer>().color = new Color(0.5f,0.5f, 0.5f, 1);
-        if (room.status == RoomClass.Status.blocked)
-        {
-            thisFloor.GetComponent<SpriteRenderer>().color = new Color(1, 0, 0, 1);
-        }
-
-        if (room.status == RoomClass.Status.empty)
-        {
-            thisFloor.GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 1);
-        }
-        if (room.floor == RoomClass.FloorType.first)
-        {
-            thisFloor.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
-        }
-
-        thisFloor.name = room.status.ToString();
-
-        showValues(room, thisFloor.GetComponent<Text>());
+        NetworkServer.Spawn(thisRoom);
         
+        // Create the floor
+        GameObject thisFloor;
+        if (room.floor == RoomClass.FloorType.normal)
+        {
+            thisFloor = (GameObject)Instantiate(floor[0], new Vector3(x,y,0),Quaternion.identity);
+        }
+        else if (room.floor == RoomClass.FloorType.first)
+        {
+            thisFloor = (GameObject)Instantiate(floor[1], new Vector3(x, y, 0), Quaternion.identity);
+        }
+        else if (room.floor == RoomClass.FloorType.boss)
+        {
+            thisFloor = (GameObject)Instantiate(floor[2], new Vector3(x, y, 0), Quaternion.identity);
+        }
+        else if (room.floor == RoomClass.FloorType.dark)
+        {
+            thisFloor = (GameObject)Instantiate(floor[3], new Vector3(x, y, 0), Quaternion.identity);
+        }
+        else if (room.floor == RoomClass.FloorType.secret)
+        {
+            thisFloor = (GameObject)Instantiate(floor[4], new Vector3(x, y, 0), Quaternion.identity);
+        }
+        else
+        {
+            thisFloor = (GameObject)Instantiate(floor[5], new Vector3(x, y, 0), Quaternion.identity);
+            Debug.Log("floor Exception -> " + room.floor.ToString());
+        }
+        showValues(room, thisFloor.GetComponent<Text>());
+        thisFloor.name = room.floor.ToString();
+        thisFloor.transform.SetParent(thisRoom.transform);
+        NetworkServer.Spawn(thisFloor);
+
+       
 
         if (room.status == RoomClass.Status.empty || room.status == RoomClass.Status.blocked)
             return;
@@ -81,65 +94,144 @@ public class CreateRoom : MonoBehaviour {
         if (room.adjacentNorth)
         {
             thisNorthWall = (GameObject)Instantiate(wallHorizontalWithDoor, new Vector3(x, y + 16, 0), Quaternion.identity);
-            thisNorthBorder = (GameObject)Instantiate(doorFrame, new Vector3(x, y + 16, 0),Quaternion.identity);
-            if (room.frameNorth == RoomClass.DoorFrame.gold)
-                thisNorthBorder.GetComponent<SpriteRenderer>().color = new Color(1, 1, 0, 1);
-            if (room.frameNorth == RoomClass.DoorFrame.bones)
-                thisNorthBorder.GetComponent<SpriteRenderer>().color = new Color(0.5f, 0.5f, 0.5f, 1);
             if (room.frameNorth == RoomClass.DoorFrame.wood)
-                thisNorthBorder.GetComponent<SpriteRenderer>().color = new Color(0xCD / 255f, 0x71 / 255f, 0x5D / 255f, 0xFF / 255f);
-            thisNorthBorder.transform.SetParent(thisRoom.transform);
+            {
+                thisNorthBorder = (GameObject)Instantiate(doorFrame[0], new Vector3(x, y + 16, 0), Quaternion.identity);
+            }
+            else if (room.frameNorth == RoomClass.DoorFrame.bones)
+            {
+                thisNorthBorder = (GameObject)Instantiate(doorFrame[1], new Vector3(x, y + 16, 0), Quaternion.identity);
+            }
+            else if (room.frameNorth == RoomClass.DoorFrame.gold)
+            {
+                thisNorthBorder = (GameObject)Instantiate(doorFrame[2], new Vector3(x, y + 16, 0), Quaternion.identity);
+            }
+            else if (room.frameNorth == RoomClass.DoorFrame.none)
+            {
+                thisNorthBorder = (GameObject)Instantiate(doorFrame[3], new Vector3(x, y + 16, 0), Quaternion.identity);
+            }
+            else if (room.frameNorth == RoomClass.DoorFrame.spikes)
+            {
+                thisNorthBorder = (GameObject)Instantiate(doorFrame[4], new Vector3(x, y + 16, 0), Quaternion.identity);
+            }
+            else
+            {
+                thisNorthBorder = (GameObject)Instantiate(doorFrame[5], new Vector3(x, y + 16, 0), Quaternion.identity);
+                Debug.Log("northBorder Exception -> " + room.frameNorth.ToString());
+            }
+                thisNorthBorder.transform.SetParent(thisRoom.transform);
+                NetworkServer.Spawn(thisNorthBorder);
         }
-        else
+        else {
             thisNorthWall = (GameObject)Instantiate(wallHorizontal, new Vector3(x, y + 16, 0), Quaternion.identity);
+        }
 
         // South
         if (room.adjacentSouth)
         {
             thisSouthWall = (GameObject)Instantiate(wallHorizontalWithDoor, new Vector3(x, y - 16, 0), Quaternion.identity);
-            thisSouthBorder = (GameObject)Instantiate(doorFrame, new Vector3(x, y - 16, 0), Quaternion.identity);
-            if (room.frameSouth == RoomClass.DoorFrame.gold)
-                thisSouthBorder.GetComponent<SpriteRenderer>().color = new Color(1, 1, 0, 1);
-            if (room.frameSouth == RoomClass.DoorFrame.bones)
-                thisSouthBorder.GetComponent<SpriteRenderer>().color = new Color(0.5f, 0.5f, 0.5f, 1);
             if (room.frameSouth == RoomClass.DoorFrame.wood)
-                thisSouthBorder.GetComponent<SpriteRenderer>().color = new Color(0xCD / 255f, 0x71 / 255f, 0x5D / 255f, 0xFF / 255f);
+            {
+                thisSouthBorder = (GameObject)Instantiate(doorFrame[0], new Vector3(x, y - 16, 0), Quaternion.identity);
+            }
+            else if (room.frameSouth == RoomClass.DoorFrame.bones)
+            {
+                thisSouthBorder = (GameObject)Instantiate(doorFrame[1], new Vector3(x, y - 16, 0), Quaternion.identity);
+            }
+            else if (room.frameSouth == RoomClass.DoorFrame.gold)
+            {
+                thisSouthBorder = (GameObject)Instantiate(doorFrame[2], new Vector3(x, y - 16, 0), Quaternion.identity);
+            }
+            else if (room.frameSouth == RoomClass.DoorFrame.none)
+            {
+                thisSouthBorder = (GameObject)Instantiate(doorFrame[3], new Vector3(x, y - 16, 0), Quaternion.identity);
+            }
+            else if (room.frameSouth == RoomClass.DoorFrame.spikes)
+            {
+                thisSouthBorder = (GameObject)Instantiate(doorFrame[4], new Vector3(x, y - 16, 0), Quaternion.identity);
+            }
+            else
+            {
+                thisSouthBorder = (GameObject)Instantiate(doorFrame[5], new Vector3(x, y - 16, 0), Quaternion.identity);
+                Debug.Log("southBorder Exception -> " + room.frameSouth.ToString());
+            }
             thisSouthBorder.transform.SetParent(thisRoom.transform);
+            NetworkServer.Spawn(thisSouthBorder);
         }
-        else
+        else {
             thisSouthWall = (GameObject)Instantiate(wallHorizontal, new Vector3(x, y - 16, 0), Quaternion.identity);
+        }
 
         // East
         if (room.adjacentEast)
         {
             thisEastWall = (GameObject)Instantiate(wallVerticalWithDoor, new Vector3(x + 28, y, 0), Quaternion.identity);
-            thisEastBorder = (GameObject)Instantiate(doorFrame, new Vector3(x + 28, y, 0), Quaternion.identity);
-            if (room.frameEast == RoomClass.DoorFrame.gold)
-                thisEastBorder.GetComponent<SpriteRenderer>().color = new Color(1, 1, 0, 1);
-            if (room.frameEast == RoomClass.DoorFrame.bones)
-                thisEastBorder.GetComponent<SpriteRenderer>().color = new Color(0.5f, 0.5f, 0.5f, 1);
             if (room.frameEast == RoomClass.DoorFrame.wood)
-                thisEastBorder.GetComponent<SpriteRenderer>().color = new Color(0xCD / 255f, 0x71 / 255f, 0x5D / 255f, 0xFF / 255f);
+            {
+                thisEastBorder = (GameObject)Instantiate(doorFrame[0], new Vector3(x + 28, y, 0), Quaternion.identity);
+            }
+            else if (room.frameEast == RoomClass.DoorFrame.bones)
+            {
+                thisEastBorder = (GameObject)Instantiate(doorFrame[1], new Vector3(x + 28, y, 0), Quaternion.identity);
+            }
+            else if (room.frameEast == RoomClass.DoorFrame.gold)
+            {
+                thisEastBorder = (GameObject)Instantiate(doorFrame[2], new Vector3(x + 28, y, 0), Quaternion.identity);
+            }
+            else if (room.frameEast == RoomClass.DoorFrame.none)
+            {
+                thisEastBorder = (GameObject)Instantiate(doorFrame[3], new Vector3(x + 28, y, 0), Quaternion.identity);
+            }
+            else if (room.frameEast == RoomClass.DoorFrame.spikes)
+            {
+                thisEastBorder = (GameObject)Instantiate(doorFrame[4], new Vector3(x + 28, y, 0), Quaternion.identity);
+            }
+            else
+            {
+                thisEastBorder = (GameObject)Instantiate(doorFrame[5], new Vector3(x + 28, y, 0), Quaternion.identity);
+                Debug.Log("southBorder Exception -> " + room.frameEast.ToString());
+            }
             thisEastBorder.transform.SetParent(thisRoom.transform);
+            NetworkServer.Spawn(thisEastBorder);
         }
-        else
+        else {
             thisEastWall = (GameObject)Instantiate(wallVertical, new Vector3(x + 28, y, 0), Quaternion.identity);
-
+        }
         // West
         if (room.adjacentWest)
         {
             thisWestWall = (GameObject)Instantiate(wallVerticalWithDoor, new Vector3(x - 28, y, 0), Quaternion.identity);
-            thisWestBorder = (GameObject)Instantiate(doorFrame, new Vector3(x - 28, y, 0), Quaternion.identity);
-            if (room.frameWest == RoomClass.DoorFrame.gold)
-                thisWestBorder.GetComponent<SpriteRenderer>().color = new Color(1, 1, 0, 1);
-            if (room.frameWest == RoomClass.DoorFrame.bones)
-                thisWestBorder.GetComponent<SpriteRenderer>().color = new Color(0.5f, 0.5f, 0.5f, 1);
             if (room.frameWest == RoomClass.DoorFrame.wood)
-                thisWestBorder.GetComponent<SpriteRenderer>().color = new Color(0xCD / 255f, 0x71 / 255f, 0x5D / 255f, 0xFF / 255f);
+            {
+                thisWestBorder = (GameObject)Instantiate(doorFrame[0], new Vector3(x - 28, y, 0), Quaternion.identity);
+            }
+            else if (room.frameWest == RoomClass.DoorFrame.bones)
+            {
+                thisWestBorder = (GameObject)Instantiate(doorFrame[1], new Vector3(x - 28, y, 0), Quaternion.identity);
+            }
+            else if (room.frameWest == RoomClass.DoorFrame.gold)
+            {
+                thisWestBorder = (GameObject)Instantiate(doorFrame[2], new Vector3(x - 28, y, 0), Quaternion.identity);
+            }
+            else if (room.frameWest == RoomClass.DoorFrame.none)
+            {
+                thisWestBorder = (GameObject)Instantiate(doorFrame[3], new Vector3(x - 28, y, 0), Quaternion.identity);
+            }
+            else if (room.frameWest == RoomClass.DoorFrame.spikes)
+            {
+                thisWestBorder = (GameObject)Instantiate(doorFrame[4], new Vector3(x - 28, y, 0), Quaternion.identity);
+            }
+            else
+            {
+                thisWestBorder = (GameObject)Instantiate(doorFrame[5], new Vector3(x - 28, y, 0), Quaternion.identity);
+                Debug.Log("southBorder Exception -> " + room.frameWest.ToString());
+            }
             thisWestBorder.transform.SetParent(thisRoom.transform);
+            NetworkServer.Spawn(thisWestBorder);
         }
-        else
+        else {
             thisWestWall = (GameObject)Instantiate(wallVertical, new Vector3(x - 28, y, 0), Quaternion.identity);
+        }
 
         // Place them inside the Holder
         // walls
@@ -150,29 +242,36 @@ public class CreateRoom : MonoBehaviour {
         // doors
 
         // frames
+
+
+
+        //NetworkServer.Spawn(thisNorthWall);
+        //NetworkServer.Spawn(thisSouthWall);
+        //NetworkServer.Spawn(thisEastWall);
+        //NetworkServer.Spawn(thisWestWall);
     }
-    
+
     void showValues(RoomClass room, Text theText)
     {
         theText.text = "status: " + room.status.ToString() + '\n' +
-                                              "type: " + room.type.ToString() + '\n' +
-                                              "floor: " + room.floor.ToString() + '\n' +
-                                              "Numbre of adj rooms: " + room.adjacentRooms().ToString() + '\n' + '\n' +
+                                                "type: " + room.type.ToString() + '\n' +
+                                                "floor: " + room.floor.ToString() + '\n' +
+                                                "Numbre of adj rooms: " + room.adjacentRooms().ToString() + '\n' + '\n' +
 
-                                              "lockNorth: " + room.lockNorth.ToString() + '\n' +
-                                              "lockSouth: " + room.lockSouth.ToString() + '\n' +
-                                              "lockEast: " + room.lockEast.ToString() + '\n' +
-                                              "lockWest: " + room.lockWest.ToString() + '\n' + '\n' +
+                                                "lockNorth: " + room.lockNorth.ToString() + '\n' +
+                                                "lockSouth: " + room.lockSouth.ToString() + '\n' +
+                                                "lockEast: " + room.lockEast.ToString() + '\n' +
+                                                "lockWest: " + room.lockWest.ToString() + '\n' + '\n' +
 
-                                              "frameNorth: " + room.frameNorth.ToString() + '\n' +
-                                              "frameSouth: " + room.frameSouth.ToString() + '\n' +
-                                              "frameEast: " + room.frameEast.ToString() + '\n' +
-                                              "frameWest: " + room.frameWest.ToString() + '\n' + '\n' +
+                                                "frameNorth: " + room.frameNorth.ToString() + '\n' +
+                                                "frameSouth: " + room.frameSouth.ToString() + '\n' +
+                                                "frameEast: " + room.frameEast.ToString() + '\n' +
+                                                "frameWest: " + room.frameWest.ToString() + '\n' + '\n' +
 
-                                              "adjacentNorth: " + room.adjacentNorth.ToString() + '\n' +
-                                              "adjacentSouth: " + room.adjacentSouth.ToString() + '\n' +
-                                              "adjacentEast: " + room.adjacentEast.ToString() + '\n' +
-                                              "adjacentWest: " + room.adjacentWest.ToString() + '\n';
+                                                "adjacentNorth: " + room.adjacentNorth.ToString() + '\n' +
+                                                "adjacentSouth: " + room.adjacentSouth.ToString() + '\n' +
+                                                "adjacentEast: " + room.adjacentEast.ToString() + '\n' +
+                                                "adjacentWest: " + room.adjacentWest.ToString() + '\n';
 
     }
 }

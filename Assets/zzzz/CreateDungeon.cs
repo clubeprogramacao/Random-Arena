@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Networking;
 
-public class CreateDungeon : MonoBehaviour {
+public class CreateDungeon : NetworkBehaviour {
 
 
     public GameObject floor;
-
+    public Camera camera;
     
 
     public int max_x;
@@ -13,13 +14,16 @@ public class CreateDungeon : MonoBehaviour {
 
     public int numberOfDoors, doorsPlaced;
 
-    public bool  boss, treasure, shop, hidden;
+    public bool showFirst, showGrid, showLogs;
+    private bool  boss, treasure, shop, hidden;
 
     public RoomClass[,] room;
 
 	// Use this for initialization
 	void Start ()
     {
+        if (!isServer)
+            return;
         boss     = false;
         treasure = false;
         shop     = false;
@@ -39,18 +43,31 @@ public class CreateDungeon : MonoBehaviour {
         }*/
         int x = (int)max_x / 2;int y = (int)max_y / 2;
         RoomClass first = room[x, y];
-
+        camera.transform.position = new Vector3(x*60, y*36,-10);
         // set its base parameters
-        first.floor = RoomClass.FloorType.first;
+        first.floor = RoomClass.FloorType.normal;
         first.status = RoomClass.Status.exists;
         first.type = RoomClass.RoomType.normal;
 
         // update adjacent room variables
         setAdjacents(x, y);
         int firstDoors = rand1(2, 4);
-        setupRoom(x,y, firstDoors,0);
+        setupRoom(x,y, firstDoors,0, true);
 
         CreateAll();
+
+        Transform dungeon = GameObject.Find("Dungeon").transform;
+        foreach(Transform roomlist in dungeon)
+        {
+            foreach (Transform component in roomlist)
+            {
+                NetworkServer.Spawn(component.gameObject);
+                if (component.gameObject.GetComponent<SpriteRenderer>() != null)
+                {
+                    //Debug.Log("name: " + component.gameObject.name + "    color: " + component.gameObject.GetComponent<SpriteRenderer>().color);
+                }
+            }
+        }
     }
 
     void setupRoomsArray()
@@ -72,135 +89,27 @@ public class CreateDungeon : MonoBehaviour {
         }
     }
     
-    /* Vector2[] setupFirstRoom()
-    {
-        // select the room at the center of the grid
-        Vector2 pos = new Vector2((int)max_x/2, (int)max_y/2);
-        RoomClass first = room[(int)pos.x, (int)pos.y];
 
-        // set its base parameters
-        first.floor = RoomClass.FloorType.first;
-        first.status = RoomClass.Status.exists;
-        first.type = RoomClass.RoomType.normal;
-
-        // update adjacent room variables
-        setAdjacents((int)pos.x, (int)pos.y);
-
-        // Create at least 2 adjacent rooms
-        int doorsToOpen = rand1(2, 4);//doorsToOpen = 2;
-        Vector2[] createdRooms = new Vector2[doorsToOpen];
-        int[] door = { 1,2, 3, 4 };
-        for (int i = 0; i < doorsToOpen; i++ )
-        {
-            if (door == null)
-                return new Vector2[0];
-            int pick = rand2(door);
-            switch (pick)
-            {
-                case 1: // North
-                    if(first.lockNorth == RoomClass.DoorLock.none)
-                    {
-                        // create the door + frame
-                        first.lockNorth = RoomClass.DoorLock.open;
-                        first.frameNorth = RoomClass.DoorFrame.wood;
-                        // set up adjacent room as existing
-                        room[(int)pos.x, (int)pos.y + 1].status = RoomClass.Status.exists;
-                        room[(int)pos.x, (int)pos.y + 1].lockSouth = RoomClass.DoorLock.open;
-                        room[(int)pos.x, (int)pos.y + 1].frameSouth = RoomClass.DoorFrame.wood;
-                        // because they exist, update its surrounding rooms
-                        setAdjacents((int)pos.x, (int)pos.y + 1);
-                        // place its position on the return array
-                        createdRooms[i] = new Vector2((int)pos.x, (int)pos.y + 1);
-                        // remove this direction to avoid repeating code
-                        door = removeNumber(door, 1);
-                        // decrease the number of doors set for this dungeon
-                        numberOfDoors--;
-                    }
-                    break;
-                case 2: // South
-                    if (first.lockSouth == RoomClass.DoorLock.none)
-                    {
-                        first.lockSouth = RoomClass.DoorLock.open;
-                        first.frameSouth = RoomClass.DoorFrame.wood;
-                        room[(int)pos.x, (int)pos.y - 1].status = RoomClass.Status.exists;
-                        room[(int)pos.x, (int)pos.y - 1].lockNorth = RoomClass.DoorLock.open;
-                        room[(int)pos.x, (int)pos.y - 1].frameNorth = RoomClass.DoorFrame.wood;
-                        setAdjacents((int)pos.x, (int)pos.y - 1);
-                        createdRooms[i] = new Vector2((int)pos.x, (int)pos.y - 1);
-                        door = removeNumber(door, 2);
-                        numberOfDoors--;
-                    }
-                    break;
-                case 3: // East
-                    if (first.lockEast == RoomClass.DoorLock.none)
-                    {
-                        first.lockEast = RoomClass.DoorLock.open;
-                        first.frameEast = RoomClass.DoorFrame.wood;
-                        room[(int)pos.x + 1, (int)pos.y].status = RoomClass.Status.exists;
-                        room[(int)pos.x + 1, (int)pos.y].lockWest = RoomClass.DoorLock.open;
-                        room[(int)pos.x + 1, (int)pos.y].frameWest = RoomClass.DoorFrame.wood;
-                        setAdjacents((int)pos.x + 1, (int)pos.y);
-                        createdRooms[i] = new Vector2((int)pos.x + 1, (int)pos.y);
-                        door = removeNumber(door, 3);
-                        numberOfDoors--;
-                    }
-                    break;
-                case 4: // West
-                    if (first.lockWest == RoomClass.DoorLock.none)
-                    {
-                        first.lockWest = RoomClass.DoorLock.open;
-                        first.frameWest = RoomClass.DoorFrame.wood;
-                        room[(int)pos.x - 1, (int)pos.y].status = RoomClass.Status.exists;
-                        room[(int)pos.x - 1, (int)pos.y].lockEast = RoomClass.DoorLock.open;
-                        room[(int)pos.x - 1, (int)pos.y].frameEast = RoomClass.DoorFrame.wood;
-                        setAdjacents((int)pos.x - 1, (int)pos.y);
-                        createdRooms[i] = new Vector2((int)pos.x - 1, (int)pos.y);
-                        door = removeNumber(door, 4);
-                        numberOfDoors--;
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-        // set adjacent rooms where there are no doors as blocked
-        for(int i = 0; i < door.Length; i++){
-            switch (door[i])
-            {
-                case 1: // north
-                    room[(int)pos.x, (int)pos.y + 1].status = RoomClass.Status.blocked;
-                    room[(int)pos.x, (int)pos.y + 1].adjacentSouth = true;
-                    break;
-                case 2: // south
-                    room[(int)pos.x, (int)pos.y - 1].status = RoomClass.Status.blocked;
-                    room[(int)pos.x, (int)pos.y - 1].adjacentNorth = true;
-                    break;
-                case 3: // east
-                    room[(int)pos.x + 1, (int)pos.y].status = RoomClass.Status.blocked;
-                    room[(int)pos.x + 1, (int)pos.y].adjacentWest = true;
-                    break;
-                case 4: // west
-                    room[(int)pos.x - 1, (int)pos.y].status = RoomClass.Status.blocked;
-                    room[(int)pos.x - 1, (int)pos.y].adjacentEast = true;
-                    break;
-                default: break;
-            }
-        }
-        return createdRooms;
-    }
-    */
-
-
-    void setupRoom(int x, int y, int numberOfExtraDoors, int generation)
+    void setupRoom(int x, int y, int numberOfExtraDoors, int generation, bool last)
     {
         generation++;
-        Debug.Log("Setting up room in " + new Vector2(x, y) + " with [" + numberOfExtraDoors + "] extra doors  {" + generation + "}" + '\n');
+        if(showLogs)
+            Debug.Log("Setting up room in " + new Vector2(x, y) + " with [" + numberOfExtraDoors + "] extra doors  {" + generation + "}" + '\n');
         // This room already has one door. We're adding more
         RoomClass thisRoom = room[x, y];
         switch (numberOfExtraDoors)
         {
             case 0: // Terminal Room
-                switch (rand1(0, 2)) // what type of terminal room?
+                int[] type = {1, 2, 3, 4 };
+                if (treasure)
+                    type = removeNumber(type, 1);
+                if (boss)
+                    type = removeNumber(type, 2);
+                if (shop)
+                    type = removeNumber(type, 3);
+                if (hidden)
+                    type = removeNumber(type, 4);
+                switch (rand2(type)) // what type of terminal room?
                 {
                     case 0: // normal
                         thisRoom.makeType(RoomClass.RoomType.normal);
@@ -208,20 +117,27 @@ public class CreateDungeon : MonoBehaviour {
                     case 1: // treasure
                         thisRoom.makeType(RoomClass.RoomType.treasure);
                         changeSurroundingDoors(x, y, thisRoom);
+                        treasure = true;
                         break;
                     case 2: // boss
                         thisRoom.makeType(RoomClass.RoomType.boss);
                         changeSurroundingDoors(x, y, thisRoom);
+                        boss = true;
                         break;
                     case 3: // shop
                         thisRoom.makeType(RoomClass.RoomType.shop);
+                        changeSurroundingDoors(x, y, thisRoom);
+                        shop = true;
                         break;
                     case 4: // hidden
                         thisRoom.makeType(RoomClass.RoomType.hidden);
+                        changeSurroundingDoors(x, y, thisRoom);
+                        hidden = true;
                         break;
                     default: break;
                 }
-                Debug.Log("It is a " + thisRoom.type.ToString()+ "    {" + generation + "}" + '\n');
+                if(showLogs)
+                    Debug.Log("It is a " + thisRoom.type.ToString()+ "    {" + generation + "}" + '\n');
                 return;
             default:
                 // start with all directions as available
@@ -237,11 +153,6 @@ public class CreateDungeon : MonoBehaviour {
                     doors1 = removeNumber(doors1, 3);
                 // copy it to another variable, because the 1st will be modified
                 int[] doors2 = doors1;
-                foreach (int d in doors1)
-                {
-                    Debug.Log("before " + new Vector2(x, y) + " direction = " + d + "   {" + generation + "}" + '\n');
-                }
-                Debug.Log("--------" + '\n');
                 // preallocate the rooms. This will prevent the case where outer "layers" of rooms get placed in positions where previous "layers" forbid
                 for (int i = 0; i < numberOfExtraDoors; ) {
                     i++;
@@ -272,7 +183,8 @@ public class CreateDungeon : MonoBehaviour {
                             //setupRoom(x, y + 1, rand1(min, max));
 
                             // never try this direction again
-                            Debug.Log("removing " + 0);
+                            if (showLogs)
+                                Debug.Log("Preallocated " + 0);
                             doors1 = removeNumber(doors1, 0);
 
                             break;
@@ -286,7 +198,8 @@ public class CreateDungeon : MonoBehaviour {
                             setAdjacents(x, y - 1);
                             //setupRoom(x, y - 1, rand1(min, max));
                             doors1 = removeNumber(doors1, 1);
-                            Debug.Log("removing " + 1);
+                            if (showLogs)
+                                Debug.Log("Preallocated " + 1);
 
                             break;
                         case 2: // east
@@ -299,7 +212,8 @@ public class CreateDungeon : MonoBehaviour {
                             setAdjacents(x + 1, y);
                             //setupRoom(x + 1, y, rand1(min, max));
                             doors1 = removeNumber(doors1, 2);
-                            Debug.Log("removing " + 2);
+                            if (showLogs)
+                                Debug.Log("Preallocated " + 2);
                             break;
                         case 3: // west
                             RoomClass roomWest = room[x - 1, y];
@@ -311,32 +225,34 @@ public class CreateDungeon : MonoBehaviour {
                             setAdjacents(x - 1, y);
                             //setupRoom(x - 1, y, rand1(min, max));
                             doors1 = removeNumber(doors1, 3);
-                            Debug.Log("removing " + 3);
+                            if (showLogs)
+                                Debug.Log("Preallocated " + 3);
                             break;
                         default: break;
                     }
 
                     doorsPlaced++;
                 }
+                
                 // pick the directions that successefully preallocated the adjacent rooms
-                foreach(int direction in doors1)
+                foreach (int direction in doors1)
                 {
                     doors2 = removeNumber(doors2, direction);
                 }
                 if (doors2.Length == 0)
                 {
-                    Debug.Log("0 possible directions2 {" + generation + "}" + '\n');
+                    if (showLogs)
+                        Debug.Log("0 possible directions2 {" + generation + "}" + '\n');
                     return;
                 }
-
-                foreach (int d in doors2)
-                    Debug.Log("after " + new Vector2(x, y) + " direction = " + d + "   {" + generation + "}" + '\n');
+                
 
                 // start creating the rooms
-                bool last = false;
+                if(numberOfExtraDoors>1)
+                    last = false;
                 foreach (int direction in doors2)
                 {
-                    if (direction == doors2[doors2.Length-1])
+                    if (direction == doors2[doors2.Length-1] && doors2.Length > 1)
                         last = true;
                     // check how many doors it can/should have
                     int min = 0; int max = numberOfDoors-doorsPlaced;
@@ -346,6 +262,8 @@ public class CreateDungeon : MonoBehaviour {
                         max = 0;
                     if (max > 3)
                         max = 3;
+                    if (showLogs)
+                        Debug.Log("Direction: " + direction + "    min: " + min + "   max: " + max + "   #doors: " + numberOfDoors + "    #placed: " + doorsPlaced + "   last: " + last.ToString() + '\n');
                     // now check the surroundings of the adjacent rooms so we know how many doors we can create there
                     int[] doors3 = { 0, 1, 2, 3 };
                     int X = x; int Y = y;
@@ -354,7 +272,8 @@ public class CreateDungeon : MonoBehaviour {
                         case 0:
                             // we moved up boyz
                             Y = y + 1;
-                            Debug.Log("trying direction " + direction + "    {" + generation + "}" + '\n');
+                            if (showLogs)
+                                Debug.Log("trying direction " + direction + "    {" + generation + "}" + '\n');
                             // check the surroundings of the next room
                             if (room[X, Y + 1].adjacentRooms() > 1) // north
                                 doors3 = removeNumber(doors3, 0);
@@ -369,12 +288,14 @@ public class CreateDungeon : MonoBehaviour {
                                 max = doors3.Length;
                             if(min > max)
                             {
-                                Debug.Log("FATAL ERROR MIN > MAX");
+                                if (showLogs)
+                                    Debug.Log("FATAL ERROR MIN > MAX");
                             }
                             break;
                         case 1:
                             Y = y - 1;
-                            Debug.Log("trying direction " + direction + "    {" + generation + "}" + '\n');
+                            if (showLogs)
+                                Debug.Log("trying direction " + direction + "    {" + generation + "}" + '\n');
                             // check the surroundings of the next room
                             if (room[X, Y + 1].adjacentRooms() > 1) // north
                                 doors3 = removeNumber(doors3, 0);
@@ -389,12 +310,14 @@ public class CreateDungeon : MonoBehaviour {
                                 max = doors3.Length;
                             if (min > max)
                             {
-                                Debug.Log("FATAL ERROR MIN > MAX");
+                                if (showLogs)
+                                    Debug.Log("FATAL ERROR MIN > MAX");
                             }
                             break;
                         case 2:
                             X = x + 1;
-                            Debug.Log("trying direction " + direction + "    {" + generation + "}" + '\n');
+                            if (showLogs)
+                                Debug.Log("trying direction " + direction + "    {" + generation + "}" + '\n');
                             // check the surroundings of the next room
                             if (room[X, Y + 1].adjacentRooms() > 1) // north
                                 doors3 = removeNumber(doors3, 0);
@@ -409,12 +332,14 @@ public class CreateDungeon : MonoBehaviour {
                                 max = doors3.Length;
                             if (min > max)
                             {
-                                Debug.Log("FATAL ERROR MIN > MAX");
+                                if (showLogs)
+                                    Debug.Log("FATAL ERROR MIN > MAX");
                             }
                             break;
                         case 3:
                             X = x - 1;
-                            Debug.Log("trying direction " + direction + "    {" + generation + "}" + '\n');
+                            if (showLogs)
+                                Debug.Log("trying direction " + direction + "    {" + generation + "}" + '\n');
                             // check the surroundings of the next room
                             if (room[X, Y + 1].adjacentRooms() > 1) // north
                                 doors3 = removeNumber(doors3, 0);
@@ -429,12 +354,15 @@ public class CreateDungeon : MonoBehaviour {
                                 max = doors3.Length;
                             if (min > max)
                             {
-                                Debug.Log("FATAL ERROR MIN > MAX");
+                                if (showLogs)
+                                    Debug.Log("FATAL ERROR MIN > MAX");
                             }
                             break;
                         default: break;
                     }
-                    setupRoom(X, Y, rand1(min, max), generation);
+                    if (showLogs)
+                        Debug.Log("setupRoom(" + X + ", " + Y + ", rand1(" + min + ", " + max + "), " + generation + ", " + last + ");" + '\n');
+                    setupRoom(X, Y, rand1(min, max), generation, last);
                 }
                 break;
         }
@@ -472,9 +400,9 @@ public class CreateDungeon : MonoBehaviour {
         {
             for (int j = 0; j < max_y; j++)
             {
-                if (j == (int)max_y / 2 && i == (int)max_x / 2)
+                if (j == (int)max_y / 2 && i == (int)max_x / 2 && showFirst)
                     room[i, j].floor = RoomClass.FloorType.first;
-                if(room[i,j].status == RoomClass.Status.exists)
+                if(room[i,j].status == RoomClass.Status.exists || showGrid)
                     GetComponent<CreateRoom>().createRoom(i, j, room[i,j]);
             }
         }

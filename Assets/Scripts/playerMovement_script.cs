@@ -87,7 +87,7 @@ public class playerMovement_script : NetworkBehaviour
             return;
         if (col.name == "Minimap")
         {
-            room = col.transform.position+Vector3.up*3.1f;
+            room = col.transform.position+Vector3.up*4.3f;
             Rpc_changeCamera(room);
         }
     }
@@ -98,7 +98,7 @@ public class playerMovement_script : NetworkBehaviour
             return;
         if (col.name == "Minimap")
         {
-            col.gameObject.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 255);
+            //col.gameObject.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 255);
         }
     }
     
@@ -110,7 +110,7 @@ public class playerMovement_script : NetworkBehaviour
             return;
         if (col.name == "Minimap")
         {
-            col.gameObject.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 100);
+            //col.gameObject.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 100);
 
         }
 
